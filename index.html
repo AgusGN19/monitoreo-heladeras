@@ -28,6 +28,8 @@
       --alert-red: #DC2626;
       --alert-red-dark: #541212;
       --alert-red-bg: #FEF2F2;
+      --warn-amber: #D97706;
+      --warn-amber-bg: #FFFBEB;
       --text-dark: #0F172A;
       --text-muted: #64748B;
       --border-color: #E2E8F0;
@@ -38,63 +40,118 @@
     body { font-family: var(--font-main); background-color: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; -webkit-font-smoothing: antialiased; }
 
     /* Barra de Navegación */
-    navbar { background-color: var(--card-bg); border-bottom: 3px solid var(--accent-teal); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .nav-brand { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+    navbar { background-color: var(--card-bg); border-bottom: 3px solid var(--accent-teal); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .nav-brand { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
     .nav-logo-box { display: flex; align-items: center; }
-    .nav-logo-img { height: 48px; width: auto; object-fit: contain; }
-    .nav-title { font-size: 1.15em; font-weight: 700; color: var(--text-dark); border-left: 2px solid var(--border-color); padding-left: 18px; letter-spacing: -0.01em; }
+    .nav-logo-img { height: 46px; width: auto; object-fit: contain; }
+    .nav-title { font-size: 1.1em; font-weight: 700; color: var(--text-dark); border-left: 2px solid var(--border-color); padding-left: 16px; letter-spacing: -0.01em; }
     
-    .nav-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .nav-btn { background: #F8FAFC; color: var(--text-dark); border: 1px solid #CBD5E1; padding: 9px 16px; border-radius: 8px; font-family: var(--font-main); font-size: 0.88em; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
+    .nav-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .nav-btn { background: #F8FAFC; color: var(--text-dark); border: 1px solid #CBD5E1; padding: 8px 13px; border-radius: 8px; font-family: var(--font-main); font-size: 0.84em; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px; }
     .nav-btn:hover { background: #E2E8F0; }
     .nav-btn.active { background: var(--accent-teal); color: white; border-color: var(--accent-teal); box-shadow: 0 2px 6px rgba(41, 161, 156, 0.3); }
     
-    .btn-audio-off { background: #FFF7ED; color: #C2410C; border-color: #FFEDD5; }
+    .btn-audio-off { background: #F1F5F9; color: #64748B; border-color: #CBD5E1; }
     .btn-audio-on { background: #ECFDF5; color: #047857; border-color: #A7F3D0; }
+    .btn-audio-snoozed { background: #FEF3C7; color: #B45309; border-color: #FDE68A; }
+    .btn-config { background: #EFF6FF; color: #1D4ED8; border-color: #BFDBFE; }
+    .btn-config:hover { background: #DBEAFE; }
+    .btn-reset { background: #FFF7ED; color: #C2410C; border-color: #FED7AA; }
+    .btn-reset:hover { background: #FFEDD5; }
+    .btn-export { background: #F0FDF4; color: #15803D; border-color: #BBF7D0; }
+    .btn-export:hover { background: #DCFCE7; }
 
-    select.nav-select { padding: 9px 14px; border-radius: 8px; border: 1px solid var(--accent-teal); background: white; color: var(--text-dark); font-family: var(--font-main); font-size: 0.88em; font-weight: 600; cursor: pointer; }
+    select.nav-select { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--accent-teal); background: white; color: var(--text-dark); font-family: var(--font-main); font-size: 0.84em; font-weight: 600; cursor: pointer; }
 
     /* Main Container */
-    .content { max-width: 1300px; margin: 25px auto; padding: 0 15px; }
+    .content { max-width: 1320px; margin: 24px auto; padding: 0 15px; }
 
-    /* Banner Superior para Heladeras en Emergencia (Rojo Intenso) */
-    .emergency-banner { background-color: var(--alert-red-dark); border: 2px solid var(--alert-red); border-radius: 12px; padding: 18px 22px; margin-bottom: 25px; display: none; box-shadow: 0 0 20px rgba(220, 38, 38, 0.4); animation: pulseGlow 1.5s infinite alternate; color: white; }
-    .emergency-title { color: #FECACA; font-size: 1em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
-    .emergency-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+    /* Banner Superior para Heladeras en Emergencia */
+    .emergency-banner { background-color: var(--alert-red-dark); border: 2px solid var(--alert-red); border-radius: 12px; padding: 18px 22px; margin-bottom: 24px; display: none; box-shadow: 0 0 20px rgba(220, 38, 38, 0.4); animation: pulseGlow 1.5s infinite alternate; color: white; }
+    .emergency-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+    .emergency-title { color: #FECACA; font-size: 1em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; }
+    .emergency-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-snooze { background: #F59E0B; color: #0F172A; border: none; padding: 7px 14px; border-radius: 7px; font-family: var(--font-main); font-size: 0.82em; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-snooze:hover { background: #FBBF24; }
+    .btn-mute-banner { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 7px 14px; border-radius: 7px; font-family: var(--font-main); font-size: 0.82em; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-mute-banner:hover { background: rgba(255,255,255,0.25); }
+    .emergency-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
 
     /* Vista General: Grid de Tarjetas Resumen */
-    .grid-heladeras { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
-    .heladera-card { background: var(--card-bg); border-radius: 12px; padding: 22px; border: 1px solid var(--border-color); border-top: 4px solid var(--accent-teal); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; }
+    .grid-heladeras { display: grid; grid-template-columns: repeat(auto-fill, minmax(365px, 1fr)); gap: 20px; }
+    .heladera-card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); border-top: 4px solid var(--accent-teal); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; }
     .heladera-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
     
     /* Tarjeta en Estado de Emergencia Roja */
     .heladera-card.in-alert { border-top-color: var(--alert-red); border-left: 2px solid var(--alert-red); border-right: 2px solid var(--alert-red); border-bottom: 2px solid var(--alert-red); background: #FEF2F2; box-shadow: 0 0 15px rgba(220, 38, 38, 0.25); animation: cardAlertPulse 2s infinite; }
 
-    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
-    .card-title { font-size: 1.1em; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
-    .card-badge { font-size: 0.75em; padding: 4px 10px; border-radius: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; display: inline-flex; align-items: center; gap: 5px; }
+    /* Tarjeta Offline (Sin señal > 12 min) */
+    .heladera-card.in-offline { border-top-color: var(--warn-amber); border-left: 2px solid #F59E0B; border-right: 2px solid #F59E0B; border-bottom: 2px solid #F59E0B; background: var(--warn-amber-bg); }
+
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 8px; }
+    .card-title { font-size: 1.08em; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+    .card-badge { font-size: 0.72em; padding: 4px 9px; border-radius: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
     .badge-ok { background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
     .badge-alert { background: var(--alert-red); color: white; border: 1px solid #B91C1C; animation: blink 1s infinite; }
+    .badge-offline { background: #F59E0B; color: #0F172A; border: 1px solid #D97706; }
+    .badge-waiting { background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; }
 
     .card-body { display: flex; gap: 15px; align-items: center; }
     .card-temps { flex: 1; }
     .temp-item { margin-bottom: 12px; }
     .temp-item:last-child { margin-bottom: 0; }
-    .temp-label { font-size: 0.78em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; display: flex; align-items: center; gap: 6px; }
+    .temp-label { font-size: 0.76em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; display: flex; align-items: center; gap: 6px; }
+    .sensor-tag { background: #E2E8F0; color: #334155; font-size: 0.85em; padding: 1px 6px; border-radius: 4px; font-weight: 700; text-transform: none; }
+    .temp-range-hint { font-size: 0.72em; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
     .temp-val { font-size: 1.65em; font-weight: 800; color: var(--text-dark); font-variant-numeric: tabular-nums; margin-top: 2px; }
     .temp-val.critical { color: var(--alert-red); }
 
-    .card-chart-mini { width: 170px; height: 100px; flex-shrink: 0; }
+    .card-chart-mini { width: 165px; height: 100px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; }
+    .card-footer-meta { font-size: 0.72em; color: #64748B; margin-top: 12px; padding-top: 8px; border-top: 1px dashed #CBD5E1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
 
     /* Vista Individual Detallada */
     .single-view { display: none; flex-direction: column; gap: 20px; }
     .single-metrics-container { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
-    .metric-box { background: var(--card-bg); padding: 24px; border-radius: 12px; text-align: center; width: 270px; border: 1px solid var(--border-color); border-top: 5px solid var(--accent-teal); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+    .metric-box { background: var(--card-bg); padding: 24px; border-radius: 12px; text-align: center; width: 280px; border: 1px solid var(--border-color); border-top: 5px solid var(--accent-teal); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
     .metric-box.alert-border { border-top-color: var(--alert-red); border-left: 2px solid var(--alert-red); border-right: 2px solid var(--alert-red); border-bottom: 2px solid var(--alert-red); background: #FEF2F2; }
     .metric-title { font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .metric-value { font-size: 2.6em; font-weight: 800; margin: 8px 0 14px 0; color: var(--text-dark); font-variant-numeric: tabular-nums; }
+    .metric-value { font-size: 2.6em; font-weight: 800; margin: 8px 0 8px 0; color: var(--text-dark); font-variant-numeric: tabular-nums; }
     
     .single-chart-container { background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color); margin-top: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); position: relative; width: 100%; height: 480px; }
+
+    /* Modales */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(3px); z-index: 1000; justify-content: center; align-items: center; padding: 15px; overflow-y: auto; }
+    .modal-box { background: var(--card-bg); border-radius: 14px; width: 100%; max-width: 660px; padding: 26px; box-shadow: 0 20px 35px rgba(0,0,0,0.2); border-top: 5px solid var(--accent-teal); max-height: 92vh; overflow-y: auto; }
+    .modal-box.reset-modal { max-width: 480px; border-top-color: #D97706; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 14px; margin-bottom: 18px; }
+    .modal-header h2 { font-size: 1.15em; font-weight: 800; color: var(--text-dark); display: flex; align-items: center; gap: 10px; }
+    .btn-close { background: none; border: none; font-size: 1.3em; color: var(--text-muted); cursor: pointer; }
+    .btn-close:hover { color: var(--alert-red); }
+
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 0.85em; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; }
+    .form-control { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #CBD5E1; font-family: var(--font-main); font-size: 0.92em; }
+    .form-control:focus { outline: none; border-color: var(--accent-teal); box-shadow: 0 0 0 3px rgba(41, 161, 156, 0.15); }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .section-divider { font-size: 0.8em; font-weight: 800; text-transform: uppercase; color: var(--accent-teal-dark); letter-spacing: 0.04em; margin: 16px 0 10px 0; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
+
+    .btn-submit { width: 100%; background: var(--accent-teal); color: white; border: none; padding: 12px; border-radius: 8px; font-family: var(--font-main); font-size: 0.95em; font-weight: 700; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+    .btn-submit:hover { background: var(--accent-teal-dark); }
+    .btn-submit-warn { background: #D97706; }
+    .btn-submit-warn:hover { background: #B45309; }
+
+    .modal-feedback { margin-top: 12px; font-size: 0.88em; font-weight: 600; text-align: center; padding: 8px; border-radius: 6px; display: none; }
+    .feedback-error { background: #FEF2F2; color: #B91C1C; border: 1px solid #FCA5A5; }
+    .feedback-ok { background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
+
+    .info-box-warn { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; padding: 12px; border-radius: 8px; font-size: 0.85em; line-height: 1.45; margin-bottom: 16px; }
+
+    /* Tabla Historial en Modal */
+    .history-table-wrapper { margin-top: 14px; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 8px; }
+    .history-table { width: 100%; border-collapse: collapse; font-size: 0.8em; text-align: left; }
+    .history-table th { background: #F8FAFC; padding: 8px 10px; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border-color); }
+    .history-table td { padding: 8px 10px; border-bottom: 1px solid var(--border-color); color: var(--text-dark); }
 
     /* Utilitarios */
     .timestamp { font-size: 0.85em; color: var(--text-muted); text-align: center; margin-top: 25px; font-weight: 500; }
@@ -104,16 +161,13 @@
     @keyframes pulseGlow { 0% { box-shadow: 0 0 10px rgba(220, 38, 38, 0.4); } 100% { box-shadow: 0 0 25px rgba(220, 38, 38, 0.8); } }
     @keyframes cardAlertPulse { 0% { border-color: var(--alert-red); } 50% { border-color: #991B1B; } 100% { border-color: var(--alert-red); } }
 
-    /* --------------------------------------------------------------------- */
-    /* REGION ADAPTATIVA (RESPONSIVE MEDIA QUERIES)                          */
-    /* --------------------------------------------------------------------- */
     @media (max-width: 768px) {
       navbar { padding: 12px 16px; flex-direction: column; align-items: stretch; gap: 12px; }
       .nav-brand { justify-content: center; text-align: center; }
       .nav-logo-img { height: 40px; }
       .nav-title { border-left: none; padding-left: 0; font-size: 1em; width: 100%; }
       .nav-controls { justify-content: space-between; width: 100%; }
-      .nav-btn { flex: 1; justify-content: center; font-size: 0.82em; padding: 8px 10px; }
+      .nav-btn { flex: 1; justify-content: center; font-size: 0.78em; padding: 8px 8px; }
       select.nav-select { width: 100%; }
 
       .grid-heladeras { grid-template-columns: 1fr; }
@@ -123,7 +177,8 @@
 
       .single-metrics-container { flex-direction: column; align-items: stretch; }
       .metric-box { width: 100%; }
-      .single-chart-container { padding: 12px; height: 320px;}
+      .single-chart-container { padding: 12px; height: 320px; }
+      .form-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -140,19 +195,31 @@
 
     <div class="nav-controls">
       <button id="btnViewGeneral" class="nav-btn active" onclick="setVista('general')">
-        <i class="fa-solid fa-border-all"></i> Vista General
+        <i class="fa-solid fa-border-all"></i> General
       </button>
       <button id="btnViewSingle" class="nav-btn" onclick="setVista('individual')">
-        <i class="fa-solid fa-chart-line"></i> Vista Detallada
+        <i class="fa-solid fa-chart-line"></i> Detallada
       </button>
       
       <select id="selectHeladeraNav" class="nav-select" style="display: none;" onchange="cambiarHeladeraIndividual()">
         <option value="1">Heladera N° 1</option>
-        <option value="2">Heladera N° 2</option>
       </select>
 
-      <button id="btnAudio" class="nav-btn btn-audio-off" onclick="habilitarAudio()">
-        <i class="fa-solid fa-volume-high"></i> Alerta Sonora
+      <button class="nav-btn btn-config" onclick="abrirModalRangos()">
+        <i class="fa-solid fa-sliders"></i> Configurar
+      </button>
+
+      <button class="nav-btn btn-reset" onclick="abrirModalReinicio()">
+        <i class="fa-solid fa-rotate-left"></i> Reiniciar Gráficas
+      </button>
+
+      <button class="nav-btn btn-export" onclick="exportarCSV()">
+        <i class="fa-solid fa-file-csv"></i> Exportar Excel
+      </button>
+
+      <!-- Interruptor Activar / Desactivar Alarma Sonora -->
+      <button id="btnAudio" class="nav-btn btn-audio-on" onclick="toggleAlarmaSonora()">
+        <i class="fa-solid fa-volume-high"></i> Alarma: ACTIVADA
       </button>
     </div>
   </navbar>
@@ -161,14 +228,24 @@
 
     <!-- SECCIÓN DE EMERGENCIAS -->
     <div class="emergency-banner" id="emergencyBanner">
-      <div class="emergency-title">
-        <i class="fa-solid fa-triangle-exclamation fa-lg" style="color:#FECACA;"></i>
-        EMERGENCIA: HELADERAS CRÍTICAS
+      <div class="emergency-header">
+        <div class="emergency-title">
+          <i class="fa-solid fa-triangle-exclamation fa-lg" style="color:#FECACA;"></i>
+          EMERGENCIA: HELADERAS CRÍTICAS
+        </div>
+        <div class="emergency-actions">
+          <button class="btn-snooze" onclick="silenciarTemporalmente(15)">
+            <i class="fa-solid fa-bell-slash"></i> Silenciar 15 min
+          </button>
+          <button class="btn-mute-banner" onclick="desactivarAlarmaDesdeBanner()">
+            <i class="fa-solid fa-volume-xmark"></i> Desactivar Alarma
+          </button>
+        </div>
       </div>
       <div class="emergency-cards-grid" id="emergencyCardsGrid"></div>
     </div>
 
-    <!-- VISTA GENERAL: TODAS LAS HELADERAS CON MINI-GRÁFICOS -->
+    <!-- VISTA GENERAL: TODAS LAS HELADERAS CON GRÁFICOS -->
     <div id="vistaGeneral" class="grid-heladeras"></div>
 
     <!-- VISTA INDIVIDUAL: DETALLE DE UNA SOLA HELADERA -->
@@ -177,17 +254,19 @@
         <div class="metric-box" id="singleCardH">
           <div class="metric-title">
             <i class="fa-solid fa-temperature-three-quarters" style="color:var(--accent-teal);"></i>
-            Heladera
+            Heladera <span class="sensor-tag" id="singleSensorTagH">Sensor 1</span>
           </div>
           <div class="metric-value" id="singleTempH">-- °C</div>
+          <div class="temp-range-hint" id="singleRangeH" style="margin-bottom: 10px;">Rango: --</div>
           <div class="card-badge badge-ok" id="singleStatusH"><i class="fa-solid fa-check"></i> NORMAL</div>
         </div>
         <div class="metric-box" id="singleCardF">
           <div class="metric-title">
             <i class="fa-solid fa-snowflake" style="color:var(--text-muted);"></i>
-            Freezer
+            Freezer <span class="sensor-tag" id="singleSensorTagF">Sensor 2</span>
           </div>
           <div class="metric-value" id="singleTempF">-- °C</div>
+          <div class="temp-range-hint" id="singleRangeF" style="margin-bottom: 10px;">Rango: --</div>
           <div class="card-badge badge-ok" id="singleStatusF"><i class="fa-solid fa-check"></i> NORMAL</div>
         </div>
       </div>
@@ -202,65 +281,642 @@
 
   </div>
 
+  <!-- MODAL 1: CONFIGURACIÓN DE RANGOS Y SENSORES -->
+  <div class="modal-overlay" id="modalRangos">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-sliders" style="color:var(--accent-teal);"></i> Configuración de Rangos y Sensores</h2>
+        <button class="btn-close" onclick="cerrarModalRangos()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="modoAplicacion">Modo de Aplicación</label>
+          <select id="modoAplicacion" class="form-control" onchange="toggleSelectHeladeraModal()">
+            <option value="INDIVIDUAL">Individual (Una heladera específica)</option>
+            <option value="GENERAL">Generalizado (Todas las heladeras)</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="grupoHeladeraModal">
+          <label for="heladeraObjetivo">Seleccionar Equipo</label>
+          <select id="heladeraObjetivo" class="form-control" onchange="precargarValoresModal()">
+            <option value="1">Heladera N° 1</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-divider"><i class="fa-solid fa-shuffle"></i> Asignación de Sondas Físicas (Sensores)</div>
+      <div class="form-group">
+        <label for="selectAsignacionSensores">¿Qué sensor mide cada compartimento?</label>
+        <select id="selectAsignacionSensores" class="form-control">
+          <option value="false">Sensor 1 (PIN 4) → Heladera  |  Sensor 2 (PIN 5) → Freezer (Estándar)</option>
+          <option value="true">Sensor 1 (PIN 4) → Freezer  |  Sensor 2 (PIN 5) → Heladera (Invertido)</option>
+        </select>
+      </div>
+
+      <div class="section-divider"><i class="fa-solid fa-temperature-three-quarters"></i> Límites Compartimento Heladera (°C)</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="inputHMin">Temperatura Mínima (°C)</label>
+          <input type="number" step="0.1" id="inputHMin" class="form-control" value="2.0">
+        </div>
+        <div class="form-group">
+          <label for="inputHMax">Temperatura Máxima (°C)</label>
+          <input type="number" step="0.1" id="inputHMax" class="form-control" value="8.0">
+        </div>
+      </div>
+
+      <div class="section-divider"><i class="fa-solid fa-snowflake"></i> Límites Compartimento Freezer (°C)</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="inputFMin">Mínima (°C) <span style="font-weight:400; color:var(--text-muted);">(Vacío = sin límite / -∞)</span></label>
+          <input type="number" step="0.1" id="inputFMin" class="form-control" placeholder="Sin límite (-∞)">
+        </div>
+        <div class="form-group">
+          <label for="inputFMax">Temperatura Máxima (°C)</label>
+          <input type="number" step="0.1" id="inputFMax" class="form-control" value="-10.0">
+        </div>
+      </div>
+
+      <div class="section-divider"><i class="fa-solid fa-lock"></i> Autorización Requerida</div>
+      <div class="form-group">
+        <label for="inputClave">Clave de Seguridad</label>
+        <input type="password" id="inputClave" class="form-control" placeholder="Ingrese la clave autorizada para guardar">
+      </div>
+
+      <button class="btn-submit" onclick="guardarNuevosRangos()">
+        <i class="fa-solid fa-floppy-disk"></i> Guardar Configuración
+      </button>
+
+      <div id="modalFeedback" class="modal-feedback"></div>
+
+      <!-- Historial Reciente de Cambios -->
+      <div class="section-divider" style="margin-top: 24px;"><i class="fa-solid fa-clock-rotate-left"></i> Últimas Modificaciones Registradas</div>
+      <div class="history-table-wrapper">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Fecha y Hora</th>
+              <th>Alcance</th>
+              <th>Sensores</th>
+              <th>Heladera</th>
+              <th>Freezer</th>
+            </tr>
+          </thead>
+          <tbody id="tablaHistorialBody">
+            <tr><td colspan="5" style="text-align:center;">Cargando historial...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: REINICIAR GRÁFICAS -->
+  <div class="modal-overlay" id="modalReinicio">
+    <div class="modal-box reset-modal">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-rotate-left" style="color:#D97706;"></i> Reiniciar Gráficas de Monitoreo</h2>
+        <button class="btn-close" onclick="cerrarModalReinicio()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="info-box-warn">
+        <i class="fa-solid fa-circle-info"></i> Limpia las curvas visuales de las gráficas para comenzar a registrar desde <strong>este preciso momento</strong>. Los datos históricos previos permanecen resguardados en la base de datos.
+      </div>
+
+      <div class="form-group">
+        <label for="alcanceReinicio">¿Qué gráficas deseás reiniciar?</label>
+        <select id="alcanceReinicio" class="form-control" onchange="toggleSelectHeladeraReinicio()">
+          <option value="GENERAL">Todas las heladeras (Reinicio global)</option>
+          <option value="INDIVIDUAL">Una heladera específica</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="grupoHeladeraReinicio" style="display: none;">
+        <label for="heladeraReinicioObjetivo">Seleccionar Equipo</label>
+        <select id="heladeraReinicioObjetivo" class="form-control">
+          <option value="1">Heladera N° 1</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="inputClaveReinicio">Clave de Seguridad</label>
+        <input type="password" id="inputClaveReinicio" class="form-control" placeholder="Ingrese la clave autorizada">
+      </div>
+
+      <button class="btn-submit btn-submit-warn" onclick="ejecutarReinicioGraficas()">
+        <i class="fa-solid fa-broom"></i> Reiniciar Gráficas Ahora
+      </button>
+
+      <div id="resetFeedback" class="modal-feedback"></div>
+    </div>
+  </div>
+
   <script>
     // ---------------------------------------------------------------------
-    // 1. CREDENCIALES SUPABASE
+    // 1. CREDENCIALES SUPABASE Y CLAVE DE AUTORIZACIÓN
     // ---------------------------------------------------------------------
     const SUPABASE_URL = 'https://irdjwuavnxigtcchrgeq.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_DipKudFI5KaHLFEzTy_LbA_LHimXyF1'; 
+    
+    const CLAVE_AUTORIZACION = 'HOSPITAL2026';
+    const MINUTOS_TIMEOUT_OFFLINE = 12; // Si no envía datos en >12 min, se marca SIN SEÑAL
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let vistaActual = 'general';
-    let heladeraSeleccionada = 1;
-    
+    let heladeraSeleccionada = '1';
     let miniCharts = {};
     let chartIndividualInstance = null;
+    let ultimosRegistrosGlobales = [];
+
+    let rangosPorHeladera = {};
+
+    function obtenerRangoEquipo(id) {
+      const key = String(id).trim();
+      return rangosPorHeladera[key] || { 
+        hMin: 2.0, 
+        hMax: 8.0, 
+        fMin: null, 
+        fMax: -10.0, 
+        invertidos: false,
+        fechaReinicio: null
+      };
+    }
+
+    function extraerTemperaturasReales(registro, rango) {
+      const rawSensor1 = registro.temp_heladera !== null ? parseFloat(registro.temp_heladera) : null;
+      const rawSensor2 = registro.temp_freezer !== null ? parseFloat(registro.temp_freezer) : null;
+
+      if (rango.invertidos) {
+        return {
+          tempH: rawSensor2,
+          tempF: rawSensor1,
+          sensorH: 'Sensor 2',
+          sensorF: 'Sensor 1'
+        };
+      } else {
+        return {
+          tempH: rawSensor1,
+          tempF: rawSensor2,
+          sensorH: 'Sensor 1',
+          sensorF: 'Sensor 2'
+        };
+      }
+    }
+
+    function formatearTextoFreezer(rango) {
+      return rango.fMin !== null 
+        ? `${rango.fMin}°C a ${rango.fMax}°C` 
+        : `≤ ${rango.fMax}°C (sin mín.)`;
+    }
+
+    function calcularMinutosTranscurridos(fechaISO) {
+      const diffMs = Date.now() - new Date(fechaISO).getTime();
+      return Math.floor(diffMs / 60000);
+    }
 
     // ---------------------------------------------------------------------
-    // 2. SISTEMA DE AUDIO (Web Audio API)
+    // 2. SISTEMA DE AUDIO (Activar / Desactivar / Silenciar 15 min)
     // ---------------------------------------------------------------------
     let audioCtx = null;
     let osc = null;
     let gainNode = null;
-    let audioPermitido = false;
+    let alarmaHabilitada = localStorage.getItem('hospital_alarma_activa') !== 'false';
+    let silenciadoHasta = 0;
     let alarmaSonando = false;
+    let hayEmergenciaActiva = false;
 
-    function habilitarAudio() {
-      audioPermitido = true;
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function actualizarBotonAudioUI() {
       const btn = document.getElementById('btnAudio');
-      btn.innerHTML = `<i class="fa-solid fa-volume-high"></i> Alerta Sonora Activa`;
-      btn.className = "nav-btn btn-audio-on";
+      const ahora = Date.now();
+
+      if (!alarmaHabilitada) {
+        btn.innerHTML = `<i class="fa-solid fa-volume-xmark"></i> Alarma: DESACTIVADA`;
+        btn.className = "nav-btn btn-audio-off";
+      } else if (silenciadoHasta > ahora) {
+        const minsRestantes = Math.ceil((silenciadoHasta - ahora) / 60000);
+        btn.innerHTML = `<i class="fa-solid fa-bell-slash"></i> Silenciada (${minsRestantes}m)`;
+        btn.className = "nav-btn btn-audio-snoozed";
+      } else {
+        btn.innerHTML = `<i class="fa-solid fa-volume-high"></i> Alarma: ACTIVADA`;
+        btn.className = "nav-btn btn-audio-on";
+      }
+    }
+
+    function desbloquearAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    document.addEventListener('click', desbloquearAudioContext, { once: true });
+
+    function toggleAlarmaSonora() {
+      desbloquearAudioContext();
+      if (!alarmaHabilitada || silenciadoHasta > Date.now()) {
+        alarmaHabilitada = true;
+        silenciadoHasta = 0;
+        localStorage.setItem('hospital_alarma_activa', 'true');
+        actualizarBotonAudioUI();
+        if (hayEmergenciaActiva) iniciarTonoAlarma();
+      } else {
+        alarmaHabilitada = false;
+        silenciadoHasta = 0;
+        localStorage.setItem('hospital_alarma_activa', 'false');
+        detenerTonoAlarma();
+        actualizarBotonAudioUI();
+      }
+    }
+
+    function silenciarTemporalmente(minutos) {
+      silenciadoHasta = Date.now() + (minutos * 60 * 1000);
+      detenerTonoAlarma();
+      actualizarBotonAudioUI();
+    }
+
+    function desactivarAlarmaDesdeBanner() {
+      alarmaHabilitada = false;
+      silenciadoHasta = 0;
+      localStorage.setItem('hospital_alarma_activa', 'false');
+      detenerTonoAlarma();
+      actualizarBotonAudioUI();
     }
 
     function iniciarTonoAlarma() {
-      if (alarmaSonando || !audioPermitido) return;
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!alarmaHabilitada || Date.now() < silenciadoHasta) {
+        detenerTonoAlarma();
+        return;
+      }
+      if (alarmaSonando) return;
 
-      osc = audioCtx.createOscillator();
-      gainNode = audioCtx.createGain();
+      try {
+        desbloquearAudioContext();
+        osc = audioCtx.createOscillator();
+        gainNode = audioCtx.createGain();
 
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(850, audioCtx.currentTime); 
-      gainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(850, audioCtx.currentTime); 
+        gainNode.gain.setValueAtTime(0.8, audioCtx.currentTime);
 
-      osc.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      osc.start();
-      alarmaSonando = true;
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        osc.start();
+        alarmaSonando = true;
+      } catch (e) {
+        console.warn('Esperando interacción para reproducir audio:', e);
+      }
     }
 
     function detenerTonoAlarma() {
       if (osc && alarmaSonando) {
-        osc.stop();
-        osc.disconnect();
+        try {
+          osc.stop();
+          osc.disconnect();
+        } catch (e) {}
         alarmaSonando = false;
       }
     }
 
     // ---------------------------------------------------------------------
-    // 3. CAMBIO DE VISTAS (Navegación)
+    // 3. GESTIÓN DE RANGOS, SENSORES Y REINICIO DE GRÁFICAS
+    // ---------------------------------------------------------------------
+    async function cargarRangosConfigurados() {
+      const errorDiv = document.getElementById('errorConsole');
+      const { data, error } = await _supabase
+        .from('configuracion_rangos')
+        .select('*')
+        .order('heladera_id', { ascending: true });
+
+      if (error) {
+        console.error('Error leyendo configuracion_rangos:', error);
+        errorDiv.innerText = `Error al leer configuración: ${error.message}`;
+        return;
+      }
+
+      if (data && data.length > 0) {
+        data.forEach(row => {
+          const key = String(row.heladera_id).trim();
+          rangosPorHeladera[key] = {
+            hMin: parseFloat(row.heladera_min),
+            hMax: parseFloat(row.heladera_max),
+            fMin: row.freezer_min !== null ? parseFloat(row.freezer_min) : null,
+            fMax: parseFloat(row.freezer_max),
+            invertidos: Boolean(row.sensores_invertidos),
+            fechaReinicio: row.fecha_reinicio_graficas ? new Date(row.fecha_reinicio_graficas) : null
+          };
+        });
+      }
+    }
+
+    function abrirModalRangos() {
+      document.getElementById('modalRangos').style.display = 'flex';
+      document.getElementById('inputClave').value = '';
+      ocultarFeedback('modalFeedback');
+      actualizarSelectoresEquipos();
+      precargarValoresModal();
+      cargarHistorialCambios();
+    }
+
+    function cerrarModalRangos() {
+      document.getElementById('modalRangos').style.display = 'none';
+    }
+
+    function abrirModalReinicio() {
+      document.getElementById('modalReinicio').style.display = 'flex';
+      document.getElementById('inputClaveReinicio').value = '';
+      ocultarFeedback('resetFeedback');
+      actualizarSelectoresEquipos();
+    }
+
+    function cerrarModalReinicio() {
+      document.getElementById('modalReinicio').style.display = 'none';
+    }
+
+    function toggleSelectHeladeraModal() {
+      const modo = document.getElementById('modoAplicacion').value;
+      document.getElementById('grupoHeladeraModal').style.display = (modo === 'INDIVIDUAL') ? 'block' : 'none';
+    }
+
+    function toggleSelectHeladeraReinicio() {
+      const alcance = document.getElementById('alcanceReinicio').value;
+      document.getElementById('grupoHeladeraReinicio').style.display = (alcance === 'INDIVIDUAL') ? 'block' : 'none';
+    }
+
+    function actualizarSelectoresEquipos() {
+      const ids = Object.keys(rangosPorHeladera).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+      if (ids.length === 0) return;
+
+      const selectModal = document.getElementById('heladeraObjetivo');
+      const selectReinicio = document.getElementById('heladeraReinicioObjetivo');
+      const selectNav = document.getElementById('selectHeladeraNav');
+      
+      const prevModal = selectModal.value;
+      const prevReinicio = selectReinicio.value;
+      const prevNav = selectNav.value;
+
+      selectModal.innerHTML = '';
+      selectReinicio.innerHTML = '';
+      selectNav.innerHTML = '';
+
+      ids.forEach(id => {
+        selectModal.innerHTML += `<option value="${id}">Heladera N° ${id}</option>`;
+        selectReinicio.innerHTML += `<option value="${id}">Heladera N° ${id}</option>`;
+        selectNav.innerHTML += `<option value="${id}">Heladera N° ${id}</option>`;
+      });
+
+      if (ids.includes(prevModal)) selectModal.value = prevModal;
+      if (ids.includes(prevReinicio)) selectReinicio.value = prevReinicio;
+      if (ids.includes(prevNav)) {
+        selectNav.value = prevNav;
+      } else {
+        heladeraSeleccionada = ids[0];
+        selectNav.value = ids[0];
+      }
+    }
+
+    function precargarValoresModal() {
+      const id = document.getElementById('heladeraObjetivo').value;
+      const r = obtenerRangoEquipo(id);
+      document.getElementById('inputHMin').value = r.hMin;
+      document.getElementById('inputHMax').value = r.hMax;
+      document.getElementById('inputFMin').value = r.fMin !== null ? r.fMin : '';
+      document.getElementById('inputFMax').value = r.fMax;
+      document.getElementById('selectAsignacionSensores').value = r.invertidos ? 'true' : 'false';
+    }
+
+    function mostrarFeedback(elementId, mensaje, esError) {
+      const fb = document.getElementById(elementId);
+      fb.innerText = mensaje;
+      fb.className = `modal-feedback ${esError ? 'feedback-error' : 'feedback-ok'}`;
+      fb.style.display = 'block';
+    }
+
+    function ocultarFeedback(elementId) {
+      document.getElementById(elementId).style.display = 'none';
+    }
+
+    async function ejecutarReinicioGraficas() {
+      const clave = document.getElementById('inputClaveReinicio').value.trim();
+      if (clave !== CLAVE_AUTORIZACION) {
+        mostrarFeedback('resetFeedback', 'Clave de seguridad incorrecta. Acceso denegado.', true);
+        return;
+      }
+
+      const alcance = document.getElementById('alcanceReinicio').value;
+      const ahoraISO = new Date().toISOString();
+
+      if (alcance === 'INDIVIDUAL') {
+        const idRaw = document.getElementById('heladeraReinicioObjetivo').value;
+        const idObj = isNaN(Number(idRaw)) ? idRaw : Number(idRaw);
+
+        const { error } = await _supabase
+          .from('configuracion_rangos')
+          .update({ fecha_reinicio_graficas: ahoraISO })
+          .eq('heladera_id', idObj);
+
+        if (error) {
+          mostrarFeedback('resetFeedback', `Error al reiniciar: ${error.message}`, true);
+          return;
+        }
+      } else {
+        const ids = Object.keys(rangosPorHeladera).map(id => isNaN(Number(id)) ? id : Number(id));
+        const { error } = await _supabase
+          .from('configuracion_rangos')
+          .update({ fecha_reinicio_graficas: ahoraISO })
+          .in('heladera_id', ids);
+
+        if (error) {
+          mostrarFeedback('resetFeedback', `Error al reiniciar gráficas: ${error.message}`, true);
+          return;
+        }
+      }
+
+      document.getElementById('inputClaveReinicio').value = '';
+      mostrarFeedback('resetFeedback', 'Gráficas reiniciadas. Esperando nuevas lecturas...', false);
+
+      await cargarRangosConfigurados();
+      obtenerDatos();
+
+      setTimeout(() => {
+        cerrarModalReinicio();
+      }, 1500);
+    }
+
+    async function guardarNuevosRangos() {
+      const clave = document.getElementById('inputClave').value.trim();
+      if (clave !== CLAVE_AUTORIZACION) {
+        mostrarFeedback('modalFeedback', 'Clave de seguridad incorrecta. Acceso denegado.', true);
+        return;
+      }
+
+      const modo = document.getElementById('modoAplicacion').value;
+      const invertidos = document.getElementById('selectAsignacionSensores').value === 'true';
+      const hMin = parseFloat(document.getElementById('inputHMin').value);
+      const hMax = parseFloat(document.getElementById('inputHMax').value);
+      
+      const fMinRaw = document.getElementById('inputFMin').value.trim();
+      const fMin = fMinRaw === '' ? null : parseFloat(fMinRaw);
+      const fMax = parseFloat(document.getElementById('inputFMax').value);
+
+      if (isNaN(hMin) || isNaN(hMax) || isNaN(fMax) || (fMin !== null && isNaN(fMin))) {
+        mostrarFeedback('modalFeedback', 'Los valores ingresados deben ser numéricos válidos.', true);
+        return;
+      }
+
+      if (hMin >= hMax || (fMin !== null && fMin >= fMax)) {
+        mostrarFeedback('modalFeedback', 'La temperatura mínima debe ser menor que la máxima.', true);
+        return;
+      }
+
+      const ahoraISO = new Date().toISOString();
+      let heladeraIdLog = null;
+
+      if (modo === 'INDIVIDUAL') {
+        const idRaw = document.getElementById('heladeraObjetivo').value;
+        const idObj = isNaN(Number(idRaw)) ? idRaw : Number(idRaw);
+        heladeraIdLog = idObj;
+
+        const { error } = await _supabase
+          .from('configuracion_rangos')
+          .upsert({
+            heladera_id: idObj,
+            heladera_min: hMin,
+            heladera_max: hMax,
+            freezer_min: fMin,
+            freezer_max: fMax,
+            sensores_invertidos: invertidos,
+            ultima_actualizacion: ahoraISO
+          });
+
+        if (error) {
+          mostrarFeedback('modalFeedback', `Error al actualizar equipo: ${error.message}`, true);
+          return;
+        }
+      } else {
+        const ids = Object.keys(rangosPorHeladera).map(id => isNaN(Number(id)) ? id : Number(id));
+        const filasUpsert = ids.map(id => ({
+          heladera_id: id,
+          heladera_min: hMin,
+          heladera_max: hMax,
+          freezer_min: fMin,
+          freezer_max: fMax,
+          sensores_invertidos: invertidos,
+          ultima_actualizacion: ahoraISO
+        }));
+
+        const { error } = await _supabase
+          .from('configuracion_rangos')
+          .upsert(filasUpsert);
+
+        if (error) {
+          mostrarFeedback('modalFeedback', `Error en actualización masiva: ${error.message}`, true);
+          return;
+        }
+      }
+
+      await _supabase
+        .from('historial_cambios_rangos')
+        .insert({
+          fecha_cambio: ahoraISO,
+          tipo_aplicacion: modo,
+          heladera_id: heladeraIdLog,
+          heladera_min: hMin,
+          heladera_max: hMax,
+          freezer_min: fMin,
+          freezer_max: fMax,
+          sensores_invertidos: invertidos
+        });
+
+      document.getElementById('inputClave').value = '';
+      mostrarFeedback('modalFeedback', 'Configuración guardada correctamente.', false);
+      
+      await cargarRangosConfigurados();
+      await cargarHistorialCambios();
+      obtenerDatos();
+    }
+
+    async function cargarHistorialCambios() {
+      const tbody = document.getElementById('tablaHistorialBody');
+      const { data, error } = await _supabase
+        .from('historial_cambios_rangos')
+        .select('*')
+        .order('fecha_cambio', { ascending: false })
+        .limit(8);
+
+      if (error || !data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Sin modificaciones registradas aún.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.map(row => {
+        const fecha = new Date(row.fecha_cambio).toLocaleString('es-AR', {
+          day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        const alcance = row.tipo_aplicacion === 'GENERAL' 
+          ? '<strong>Todas</strong>' 
+          : `N° ${row.heladera_id}`;
+        const textoSensores = row.sensores_invertidos 
+          ? 'S1:Freez / S2:Hel' 
+          : 'S1:Hel / S2:Freez';
+        const textoFreezer = row.freezer_min !== null 
+          ? `${row.freezer_min}° a ${row.freezer_max}°` 
+          : `≤ ${row.freezer_max}°`;
+        return `
+          <tr>
+            <td>${fecha}</td>
+            <td>${alcance}</td>
+            <td>${textoSensores}</td>
+            <td>${row.heladera_min}° a ${row.heladera_max}°</td>
+            <td>${textoFreezer}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ---------------------------------------------------------------------
+    // 4. EXPORTAR REPORTE CSV (EXCEL PARA AUDITORÍA HOSPITALARIA)
+    // ---------------------------------------------------------------------
+    function exportarCSV() {
+      if (!ultimosRegistrosGlobales || ultimosRegistrosGlobales.length === 0) {
+        alert('No hay datos disponibles para exportar.');
+        return;
+      }
+
+      let csv = 'Fecha y Hora;Equipo;Temp Heladera (C);Temp Freezer (C);Estado\n';
+
+      ultimosRegistrosGlobales.forEach(row => {
+        const id = String(row.heladera_id).trim();
+        const rango = obtenerRangoEquipo(id);
+        const { tempH, tempF } = extraerTemperaturasReales(row, rango);
+        const fechaStr = new Date(row.fecha_hora).toLocaleString('es-AR');
+
+        const hCrit = tempH !== null && (tempH < rango.hMin || tempH > rango.hMax);
+        const fCrit = tempF !== null && (tempF > rango.fMax || (rango.fMin !== null && tempF < rango.fMin));
+        const estado = (hCrit || fCrit) ? 'ALERTA CRITICA' : 'NORMAL';
+
+        const valH = tempH !== null ? tempH.toFixed(1).replace('.', ',') : '';
+        const valF = tempF !== null ? tempF.toFixed(1).replace('.', ',') : '';
+
+        csv += `${fechaStr};Heladera N° ${id};${valH};${valF};${estado}\n`;
+      });
+
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const fechaHoy = new Date().toISOString().slice(0, 10);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Reporte_Temperaturas_Hospital_${fechaHoy}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // ---------------------------------------------------------------------
+    // 5. CAMBIO DE VISTAS (Navegación)
     // ---------------------------------------------------------------------
     function setVista(modo) {
       vistaActual = modo;
@@ -286,22 +942,25 @@
     }
 
     function cambiarHeladeraIndividual() {
-      heladeraSeleccionada = parseInt(document.getElementById('selectHeladeraNav').value);
+      heladeraSeleccionada = String(document.getElementById('selectHeladeraNav').value).trim();
       obtenerDatos();
     }
 
     // ---------------------------------------------------------------------
-    // 4. LÓGICA PRINCIPAL DE DATOS (Supabase)
+    // 6. LÓGICA PRINCIPAL DE DATOS (Supabase + Filtro por Reinicio)
     // ---------------------------------------------------------------------
     async function obtenerDatos() {
       const errorDiv = document.getElementById('errorConsole');
       errorDiv.innerText = '';
+      actualizarBotonAudioUI();
+
+      await cargarRangosConfigurados();
 
       const { data, error } = await _supabase
         .from('mediciones_temperatura')
         .select('*')
         .order('fecha_hora', { ascending: false })
-        .limit(100);
+        .limit(300);
 
       if (error) {
         console.error('Error Supabase:', error);
@@ -314,47 +973,66 @@
         return;
       }
 
+      ultimosRegistrosGlobales = data;
+
       const medicionesPorHeladera = {};
-      data.forEach(row => {
-        const id = row.heladera_id;
-        if (!medicionesPorHeladera[id]) {
-          medicionesPorHeladera[id] = [];
-        }
-        medicionesPorHeladera[id].push(row);
+      Object.keys(rangosPorHeladera).forEach(id => {
+        medicionesPorHeladera[id] = [];
       });
 
+      data.forEach(row => {
+        const id = String(row.heladera_id).trim();
+        if (!medicionesPorHeladera[id]) {
+          medicionesPorHeladera[id] = [];
+          if (!rangosPorHeladera[id]) {
+            rangosPorHeladera[id] = { hMin: 2.0, hMax: 8.0, fMin: null, fMax: -10.0, invertidos: false, fechaReinicio: null };
+          }
+        }
+
+        const rango = obtenerRangoEquipo(id);
+        const fechaMedicion = new Date(row.fecha_hora);
+        if (!rango.fechaReinicio || fechaMedicion >= rango.fechaReinicio) {
+          medicionesPorHeladera[id].push(row);
+        }
+      });
+
+      actualizarSelectoresEquipos();
       evaluarEmergencias(medicionesPorHeladera);
 
       if (vistaActual === 'general') {
         renderizarVistaGeneral(medicionesPorHeladera);
       } else {
-        renderizarVistaIndividual(medicionesPorHeladera[heladeraSeleccionada] || []);
+        renderizarVistaIndividual(medicionesPorHeladera[heladeraSeleccionada] || [], heladeraSeleccionada);
       }
 
       document.getElementById('lastUpdate').innerText = `Última sincronización global: ${new Date().toLocaleTimeString('es-AR')}`;
     }
 
     // ---------------------------------------------------------------------
-    // 5. BANNER SUPERIOR DE EMERGENCIAS (Rojo Vivo)
+    // 7. BANNER SUPERIOR DE EMERGENCIAS
     // ---------------------------------------------------------------------
     function evaluarEmergencias(medicionesPorHeladera) {
       const banner = document.getElementById('emergencyBanner');
       const grid = document.getElementById('emergencyCardsGrid');
       grid.innerHTML = '';
       
-      let hayAlertaGlobal = false;
+      hayEmergenciaActiva = false;
 
-      Object.keys(medicionesPorHeladera).forEach(id => {
+      Object.keys(medicionesPorHeladera).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).forEach(id => {
         const registros = medicionesPorHeladera[id];
-        const ultimo = registros[0];
-        const tempH = parseFloat(ultimo.temp_heladera);
-        const tempF = parseFloat(ultimo.temp_freezer);
+        if (!registros || registros.length === 0) return;
 
-        const hCritica = tempH < 2.0 || tempH > 8.0;
-        const fCritica = (ultimo.temp_freezer !== null) && (tempF < -25.0 || tempF > -15.0);
+        const ultimo = registros[0];
+        const rango = obtenerRangoEquipo(id);
+        const { tempH, tempF, sensorH, sensorF } = extraerTemperaturasReales(ultimo, rango);
+
+        const hCritica = tempH !== null && (tempH < rango.hMin || tempH > rango.hMax);
+        const fCritica = tempF !== null && (
+          tempF > rango.fMax || (rango.fMin !== null && tempF < rango.fMin)
+        );
 
         if (hCritica || fCritica) {
-          hayAlertaGlobal = true;
+          hayEmergenciaActiva = true;
           grid.innerHTML += `
             <div class="heladera-card in-alert">
               <div class="card-header">
@@ -362,15 +1040,15 @@
                 <span class="card-badge badge-alert"><i class="fa-solid fa-triangle-exclamation"></i> CRÍTICO</span>
               </div>
               <div style="font-size: 0.9em; line-height: 1.5; color: #7F1D1D; font-weight:600;">
-                ${hCritica ? `<div><i class="fa-solid fa-temperature-high"></i> Heladera: <strong style="color:var(--alert-red); font-size:1.1em;">${tempH.toFixed(1)} °C</strong></div>` : ''}
-                ${fCritica ? `<div><i class="fa-solid fa-snowflake"></i> Freezer: <strong style="color:var(--alert-red); font-size:1.1em;">${tempF.toFixed(1)} °C</strong></div>` : ''}
+                ${hCritica ? `<div><i class="fa-solid fa-temperature-high"></i> Heladera (${sensorH}): <strong style="color:var(--alert-red); font-size:1.1em;">${tempH.toFixed(1)} °C</strong> <span style="font-size:0.8em;">(${rango.hMin}° a ${rango.hMax}°)</span></div>` : ''}
+                ${fCritica ? `<div><i class="fa-solid fa-snowflake"></i> Freezer (${sensorF}): <strong style="color:var(--alert-red); font-size:1.1em;">${tempF.toFixed(1)} °C</strong> <span style="font-size:0.8em;">(${formatearTextoFreezer(rango)})</span></div>` : ''}
               </div>
             </div>
           `;
         }
       });
 
-      if (hayAlertaGlobal) {
+      if (hayEmergenciaActiva) {
         banner.style.display = 'block';
         iniciarTonoAlarma();
       } else {
@@ -380,12 +1058,12 @@
     }
 
     // ---------------------------------------------------------------------
-    // 6. RENDERIZADO DE VISTA GENERAL (Tarjetas + Mini Gráficos)
+    // 8. RENDERIZADO DE VISTA GENERAL
     // ---------------------------------------------------------------------
     function renderizarVistaGeneral(medicionesPorHeladera) {
       const container = document.getElementById('vistaGeneral');
       
-      Object.keys(medicionesPorHeladera).forEach(id => {
+      Object.keys(medicionesPorHeladera).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).forEach(id => {
         let card = document.getElementById(`card-general-${id}`);
         if (!card) {
           card = document.createElement('div');
@@ -394,50 +1072,116 @@
           container.appendChild(card);
         }
 
-        const registros = medicionesPorHeladera[id].slice(0, 10).reverse();
+        const rango = obtenerRangoEquipo(id);
+        const registros = (medicionesPorHeladera[id] || []).slice(0, 12).reverse();
+        const textoReinicio = rango.fechaReinicio 
+          ? `<span><i class="fa-solid fa-clock"></i> Inicio: ${rango.fechaReinicio.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>` 
+          : '<span></span>';
+
+        if (registros.length === 0) {
+          if (miniCharts[id]) {
+            miniCharts[id].destroy();
+            delete miniCharts[id];
+          }
+          card.className = 'heladera-card';
+          card.innerHTML = `
+            <div class="card-header">
+              <span class="card-title"><i class="fa-solid fa-box-archive" style="color:var(--accent-teal);"></i> Heladera N° ${id}</span>
+              <span class="card-badge badge-waiting"><i class="fa-solid fa-hourglass-half"></i> ESPERANDO</span>
+            </div>
+            <div class="card-body">
+              <div class="card-temps">
+                <div class="temp-item">
+                  <div class="temp-label">Heladera <span class="sensor-tag">${rango.invertidos ? 'Sensor 2' : 'Sensor 1'}</span></div>
+                  <div class="temp-val">-- °C</div>
+                  <div class="temp-range-hint">Límite: ${rango.hMin}°C a ${rango.hMax}°C</div>
+                </div>
+                <div class="temp-item">
+                  <div class="temp-label">Freezer <span class="sensor-tag">${rango.invertidos ? 'Sensor 1' : 'Sensor 2'}</span></div>
+                  <div class="temp-val">-- °C</div>
+                  <div class="temp-range-hint">Límite: ${formatearTextoFreezer(rango)}</div>
+                </div>
+              </div>
+              <div class="card-chart-mini" style="text-align:center; font-size:0.75em; color:#64748B;">
+                <i class="fa-solid fa-chart-line fa-2x" style="opacity:0.25; margin-bottom:6px;"></i>
+                <div>Sin lecturas nuevas aún</div>
+              </div>
+            </div>
+            <div class="card-footer-meta">${textoReinicio}<span>Esperando señal ESP32...</span></div>
+          `;
+          return;
+        }
+
         const ultimo = registros[registros.length - 1];
+        const { tempH, tempF, sensorH, sensorF } = extraerTemperaturasReales(ultimo, rango);
+        const minsSinDatos = calcularMinutosTranscurridos(ultimo.fecha_hora);
+        const estaOffline = minsSinDatos > MINUTOS_TIMEOUT_OFFLINE;
 
-        const tempH = parseFloat(ultimo.temp_heladera);
-        const tempF = parseFloat(ultimo.temp_freezer);
-
-        const hCritica = tempH < 2.0 || tempH > 8.0;
-        const fCritica = (ultimo.temp_freezer !== null) && (tempF < -25.0 || tempF > -15.0);
+        const hCritica = tempH !== null && (tempH < rango.hMin || tempH > rango.hMax);
+        const fCritica = tempF !== null && (
+          tempF > rango.fMax || (rango.fMin !== null && tempF < rango.fMin)
+        );
         const enAlerta = hCritica || fCritica;
 
-        card.className = `heladera-card ${enAlerta ? 'in-alert' : ''}`;
+        let cardClase = 'heladera-card';
+        let badgeHTML = '<span class="card-badge badge-ok"><i class="fa-solid fa-circle-check"></i> NORMAL</span>';
+
+        if (enAlerta) {
+          cardClase = 'heladera-card in-alert';
+          badgeHTML = '<span class="card-badge badge-alert"><i class="fa-solid fa-triangle-exclamation"></i> ALERTA</span>';
+        } else if (estaOffline) {
+          cardClase = 'heladera-card in-offline';
+          badgeHTML = `<span class="card-badge badge-offline"><i class="fa-solid fa-wifi"></i> SIN SEÑAL (${minsSinDatos}m)</span>`;
+        }
+
+        const horaUltimoDato = new Date(ultimo.fecha_hora).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+
+        card.className = cardClase;
         card.innerHTML = `
           <div class="card-header">
             <span class="card-title"><i class="fa-solid fa-box-archive" style="color:var(--accent-teal);"></i> Heladera N° ${id}</span>
-            <span class="card-badge ${enAlerta ? 'badge-alert' : 'badge-ok'}">${enAlerta ? '<i class="fa-solid fa-triangle-exclamation"></i> ALERTA' : '<i class="fa-solid fa-circle-check"></i> NORMAL'}</span>
+            ${badgeHTML}
           </div>
           <div class="card-body">
             <div class="card-temps">
               <div class="temp-item">
-                <div class="temp-label"><i class="fa-solid fa-temperature-three-quarters" style="color:var(--accent-teal);"></i> Heladera</div>
-                <div class="temp-val ${hCritica ? 'critical' : ''}">${tempH.toFixed(1)} °C</div>
+                <div class="temp-label">
+                  <i class="fa-solid fa-temperature-three-quarters" style="color:var(--accent-teal);"></i> 
+                  Heladera <span class="sensor-tag">${sensorH}</span>
+                </div>
+                <div class="temp-val ${hCritica ? 'critical' : ''}">${tempH !== null ? tempH.toFixed(1) + ' °C' : '--'}</div>
+                <div class="temp-range-hint">Límite: ${rango.hMin}°C a ${rango.hMax}°C</div>
               </div>
               <div class="temp-item">
-                <div class="temp-label"><i class="fa-solid fa-snowflake" style="color:var(--text-muted);"></i> Freezer</div>
-                <div class="temp-val ${fCritica ? 'critical' : ''}">${ultimo.temp_freezer !== null ? tempF.toFixed(1) + ' °C' : '--'}</div>
+                <div class="temp-label">
+                  <i class="fa-solid fa-snowflake" style="color:var(--text-muted);"></i> 
+                  Freezer <span class="sensor-tag">${sensorF}</span>
+                </div>
+                <div class="temp-val ${fCritica ? 'critical' : ''}">${tempF !== null ? tempF.toFixed(1) + ' °C' : '--'}</div>
+                <div class="temp-range-hint">Límite: ${formatearTextoFreezer(rango)}</div>
               </div>
             </div>
             <div class="card-chart-mini">
               <canvas id="mini-chart-${id}"></canvas>
             </div>
           </div>
+          <div class="card-footer-meta">
+            ${textoReinicio}
+            <span>Último reporte: <strong>${horaUltimoDato}</strong></span>
+          </div>
         `;
 
-        setTimeout(() => renderMiniChart(id, registros), 50);
+        setTimeout(() => renderMiniChart(id, registros, rango), 50);
       });
     }
 
-    function renderMiniChart(id, registros) {
+    function renderMiniChart(id, registros, rango) {
       const ctx = document.getElementById(`mini-chart-${id}`)?.getContext('2d');
       if (!ctx) return;
 
       const labels = registros.map(r => new Date(r.fecha_hora).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }));
-      const dataH = registros.map(r => parseFloat(r.temp_heladera));
-      const dataF = registros.map(r => parseFloat(r.temp_freezer));
+      const dataH = registros.map(r => extraerTemperaturasReales(r, rango).tempH);
+      const dataF = registros.map(r => extraerTemperaturasReales(r, rango).tempF);
 
       if (miniCharts[id]) {
         miniCharts[id].destroy();
@@ -448,8 +1192,8 @@
         data: {
           labels: labels,
           datasets: [
-            { label: 'Heladera', data: dataH, borderColor: '#29A19C', borderWidth: 2.5, pointRadius: 0, tension: 0.3 },
-            { label: 'Freezer', data: dataF, borderColor: '#64748B', borderWidth: 1.5, pointRadius: 0, tension: 0.3 }
+            { label: 'Heladera', data: dataH, borderColor: '#29A19C', borderWidth: 2.5, pointRadius: registros.length === 1 ? 3 : 0, tension: 0.3 },
+            { label: 'Freezer', data: dataF, borderColor: '#64748B', borderWidth: 1.5, pointRadius: registros.length === 1 ? 3 : 0, tension: 0.3 }
           ]
         },
         options: {
@@ -462,7 +1206,7 @@
     }
 
     // ---------------------------------------------------------------------
-    // 7. RENDERIZADO DE VISTA INDIVIDUAL DETALLADA
+    // 9. RENDERIZADO DE VISTA INDIVIDUAL DETALLADA
     // ---------------------------------------------------------------------
     function inicializarGraficoIndividual() {
       const ctx = document.getElementById('chartIndividual').getContext('2d');
@@ -492,24 +1236,53 @@
       });
     }
 
-    function renderizarVistaIndividual(registros) {
-      if (!registros || registros.length === 0) return;
+    function renderizarVistaIndividual(registros, id) {
+      const rango = obtenerRangoEquipo(id);
 
-      const ordenados = [...registros].slice(0, 15).reverse();
+      if (!registros || registros.length === 0) {
+        document.getElementById('singleSensorTagH').innerText = rango.invertidos ? 'Sensor 2' : 'Sensor 1';
+        document.getElementById('singleTempH').innerText = '-- °C';
+        document.getElementById('singleRangeH').innerText = `Límite: ${rango.hMin}°C a ${rango.hMax}°C`;
+        document.getElementById('singleStatusH').innerHTML = '<i class="fa-solid fa-hourglass-half"></i> ESPERANDO';
+        document.getElementById('singleStatusH').className = 'card-badge badge-waiting';
+        document.getElementById('singleCardH').className = 'metric-box';
+
+        document.getElementById('singleSensorTagF').innerText = rango.invertidos ? 'Sensor 1' : 'Sensor 2';
+        document.getElementById('singleTempF').innerText = '-- °C';
+        document.getElementById('singleRangeF').innerText = `Límite: ${formatearTextoFreezer(rango)}`;
+        document.getElementById('singleStatusF').innerHTML = '<i class="fa-solid fa-hourglass-half"></i> ESPERANDO';
+        document.getElementById('singleStatusF').className = 'card-badge badge-waiting';
+        document.getElementById('singleCardF').className = 'metric-box';
+
+        if (chartIndividualInstance) {
+          chartIndividualInstance.options.plugins.title.text = `Histórico Detallado - Heladera N° ${heladeraSeleccionada} (Esperando lecturas)`;
+          chartIndividualInstance.data.labels = [];
+          chartIndividualInstance.data.datasets[0].data = [];
+          chartIndividualInstance.data.datasets[1].data = [];
+          chartIndividualInstance.update();
+        }
+        return;
+      }
+
+      const ordenados = [...registros].slice(0, 20).reverse();
       const ultimo = ordenados[ordenados.length - 1];
+      const { tempH, tempF, sensorH, sensorF } = extraerTemperaturasReales(ultimo, rango);
 
-      const tempH = parseFloat(ultimo.temp_heladera);
-      const tempF = parseFloat(ultimo.temp_freezer);
+      const hCritica = tempH !== null && (tempH < rango.hMin || tempH > rango.hMax);
+      const fCritica = tempF !== null && (
+        tempF > rango.fMax || (rango.fMin !== null && tempF < rango.fMin)
+      );
 
-      const hCritica = tempH < 2.0 || tempH > 8.0;
-      const fCritica = (ultimo.temp_freezer !== null) && (tempF < -25.0 || tempF > -15.0);
-
-      document.getElementById('singleTempH').innerText = `${tempH.toFixed(1)} °C`;
+      document.getElementById('singleSensorTagH').innerText = sensorH;
+      document.getElementById('singleTempH').innerText = tempH !== null ? `${tempH.toFixed(1)} °C` : '--';
+      document.getElementById('singleRangeH').innerText = `Límite: ${rango.hMin}°C a ${rango.hMax}°C`;
       document.getElementById('singleStatusH').innerHTML = hCritica ? '<i class="fa-solid fa-triangle-exclamation"></i> CRÍTICO' : '<i class="fa-solid fa-check"></i> NORMAL';
       document.getElementById('singleStatusH').className = `card-badge ${hCritica ? 'badge-alert' : 'badge-ok'}`;
       document.getElementById('singleCardH').className = `metric-box ${hCritica ? 'alert-border' : ''}`;
 
-      document.getElementById('singleTempF').innerText = ultimo.temp_freezer !== null ? `${tempF.toFixed(1)} °C` : '--';
+      document.getElementById('singleSensorTagF').innerText = sensorF;
+      document.getElementById('singleTempF').innerText = tempF !== null ? `${tempF.toFixed(1)} °C` : '--';
+      document.getElementById('singleRangeF').innerText = `Límite: ${formatearTextoFreezer(rango)}`;
       document.getElementById('singleStatusF').innerHTML = fCritica ? '<i class="fa-solid fa-triangle-exclamation"></i> CRÍTICO' : '<i class="fa-solid fa-check"></i> NORMAL';
       document.getElementById('singleStatusF').className = `card-badge ${fCritica ? 'badge-alert' : 'badge-ok'}`;
       document.getElementById('singleCardF').className = `metric-box ${fCritica ? 'alert-border' : ''}`;
@@ -517,8 +1290,8 @@
       if (chartIndividualInstance) {
         chartIndividualInstance.options.plugins.title.text = `Histórico Detallado - Heladera N° ${heladeraSeleccionada}`;
         chartIndividualInstance.data.labels = ordenados.map(r => new Date(r.fecha_hora).toLocaleTimeString('es-AR'));
-        chartIndividualInstance.data.datasets[0].data = ordenados.map(r => parseFloat(r.temp_heladera));
-        chartIndividualInstance.data.datasets[1].data = ordenados.map(r => parseFloat(r.temp_freezer));
+        chartIndividualInstance.data.datasets[0].data = ordenados.map(r => extraerTemperaturasReales(r, rango).tempH);
+        chartIndividualInstance.data.datasets[1].data = ordenados.map(r => extraerTemperaturasReales(r, rango).tempF);
         chartIndividualInstance.update();
       }
     }
@@ -526,6 +1299,7 @@
     // ---------------------------------------------------------------------
     // INICIALIZACIÓN PERIÓDICA
     // ---------------------------------------------------------------------
+    actualizarBotonAudioUI();
     obtenerDatos();
     setInterval(obtenerDatos, 10000);
   </script>
