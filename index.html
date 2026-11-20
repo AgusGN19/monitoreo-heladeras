@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob:; connect-src 'self' https://irdjwuavnxigtcchrgeq.supabase.co wss://irdjwuavnxigtcchrgeq.supabase.co;">
   <title>Sistema de Monitoreo - Hospital de la Madre y el Niño</title>
 
   <!-- Tipografía Profesional Google Fonts: Inter -->
@@ -11,12 +13,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Iconos Profesionales via Font Awesome 6 CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
   <!-- Supabase JS Client via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Chart.js via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Generador de QR local via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <style>
     :root {
@@ -39,6 +43,14 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: var(--font-main); background-color: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; -webkit-font-smoothing: antialiased; }
 
+    /* Pantalla de Login Institucional */
+    .login-overlay { position: fixed; inset: 0; background: #0F172A; display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 16px; }
+    .login-card { background: #FFFFFF; padding: 32px 28px; border-radius: 14px; width: 100%; max-width: 390px; box-shadow: 0 20px 35px rgba(0,0,0,0.35); border-top: 5px solid var(--accent-teal); }
+    .login-header { text-align: center; margin-bottom: 22px; }
+    .login-header img { height: 52px; margin-bottom: 10px; object-fit: contain; }
+    .login-header h2 { font-size: 1.2em; font-weight: 800; color: var(--text-dark); }
+    .login-header p { font-size: 0.84em; color: var(--text-muted); margin-top: 4px; }
+
     /* Barra de Navegación */
     navbar { background-color: var(--card-bg); border-bottom: 3px solid var(--accent-teal); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .nav-brand { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
@@ -60,6 +72,8 @@
     .btn-reset:hover { background: #FFEDD5; }
     .btn-export { background: #F0FDF4; color: #15803D; border-color: #BBF7D0; }
     .btn-export:hover { background: #DCFCE7; }
+    .btn-logout { background: #FEF2F2; color: #B91C1C; border-color: #FECACA; }
+    .btn-logout:hover { background: #FEE2E2; }
 
     select.nav-select { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--accent-teal); background: white; color: var(--text-dark); font-family: var(--font-main); font-size: 0.84em; font-weight: 600; cursor: pointer; }
 
@@ -82,10 +96,7 @@
     .heladera-card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); border-top: 4px solid var(--accent-teal); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; }
     .heladera-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
     
-    /* Tarjeta en Estado de Emergencia Roja */
     .heladera-card.in-alert { border-top-color: var(--alert-red); border-left: 2px solid var(--alert-red); border-right: 2px solid var(--alert-red); border-bottom: 2px solid var(--alert-red); background: #FEF2F2; box-shadow: 0 0 15px rgba(220, 38, 38, 0.25); animation: cardAlertPulse 2s infinite; }
-
-    /* Tarjeta Offline (Sin señal > 12 min) */
     .heladera-card.in-offline { border-top-color: var(--warn-amber); border-left: 2px solid #F59E0B; border-right: 2px solid #F59E0B; border-bottom: 2px solid #F59E0B; background: var(--warn-amber-bg); }
 
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 8px; }
@@ -121,7 +132,7 @@
 
     /* Modales */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(3px); z-index: 1000; justify-content: center; align-items: center; padding: 15px; overflow-y: auto; }
-    .modal-box { background: var(--card-bg); border-radius: 14px; width: 100%; max-width: 660px; padding: 26px; box-shadow: 0 20px 35px rgba(0,0,0,0.2); border-top: 5px solid var(--accent-teal); max-height: 92vh; overflow-y: auto; }
+    .modal-box { background: var(--card-bg); border-radius: 14px; width: 100%; max-width: 700px; padding: 26px; box-shadow: 0 20px 35px rgba(0,0,0,0.2); border-top: 5px solid var(--accent-teal); max-height: 92vh; overflow-y: auto; }
     .modal-box.reset-modal { max-width: 480px; border-top-color: #D97706; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 14px; margin-bottom: 18px; }
     .modal-header h2 { font-size: 1.15em; font-weight: 800; color: var(--text-dark); display: flex; align-items: center; gap: 10px; }
@@ -134,7 +145,7 @@
     .form-control:focus { outline: none; border-color: var(--accent-teal); box-shadow: 0 0 0 3px rgba(41, 161, 156, 0.15); }
     
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .section-divider { font-size: 0.8em; font-weight: 800; text-transform: uppercase; color: var(--accent-teal-dark); letter-spacing: 0.04em; margin: 16px 0 10px 0; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
+    .section-divider { font-size: 0.8em; font-weight: 800; text-transform: uppercase; color: var(--accent-teal-dark); letter-spacing: 0.04em; margin: 20px 0 10px 0; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
 
     .btn-submit { width: 100%; background: var(--accent-teal); color: white; border: none; padding: 12px; border-radius: 8px; font-family: var(--font-main); font-size: 0.95em; font-weight: 700; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
     .btn-submit:hover { background: var(--accent-teal-dark); }
@@ -146,6 +157,28 @@
     .feedback-ok { background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
 
     .info-box-warn { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; padding: 12px; border-radius: 8px; font-size: 0.85em; line-height: 1.45; margin-bottom: 16px; }
+
+    /* Lista de Destinatarios de Alertas (Solo Email) */
+    .dest-add-grid { display: grid; grid-template-columns: 1.2fr 1.6fr auto; gap: 8px; align-items: center; margin-bottom: 12px; }
+    .btn-add-dest { background: #0284C7; color: white; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 700; font-size: 0.85em; cursor: pointer; white-space: nowrap; }
+    .btn-add-dest:hover { background: #0369A1; }
+    .dest-list { list-style: none; display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; }
+    .dest-item { display: flex; justify-content: space-between; align-items: center; background: #F8FAFC; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; font-size: 0.85em; gap: 8px; }
+    .dest-item-info { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .dest-tag-email { background: #DBEAFE; color: #1E40AF; padding: 2px 7px; border-radius: 4px; font-weight: 700; font-size: 0.78em; }
+    .btn-del-dest { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; padding: 4px 9px; border-radius: 6px; font-size: 0.8em; font-weight: 700; cursor: pointer; }
+    .btn-del-dest:hover { background: #FECACA; }
+
+    /* Tarjeta QR Telegram */
+    .tg-qr-box { display: flex; align-items: center; gap: 18px; background: #F0F9FF; border: 1px solid #BAE6FD; border-radius: 10px; padding: 14px 16px; margin-top: 10px; }
+    .tg-qr-canvas { background: #FFFFFF; padding: 8px; border-radius: 8px; border: 1px solid #E2E8F0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .tg-qr-info { flex: 1; font-size: 0.83em; color: #0C4A6E; line-height: 1.45; }
+    .tg-qr-info strong { display: block; font-size: 1.05em; margin-bottom: 4px; color: #0369A1; }
+    .tg-qr-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .btn-tg-link { background: #0284C7; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 0.9em; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-tg-link:hover { background: #0369A1; }
+    .btn-tg-download { background: white; color: #0369A1; border: 1px solid #7DD3FC; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 0.9em; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-tg-download:hover { background: #E0F2FE; }
 
     /* Tabla Historial en Modal */
     .history-table-wrapper { margin-top: 14px; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 8px; }
@@ -179,10 +212,40 @@
       .metric-box { width: 100%; }
       .single-chart-container { padding: 12px; height: 320px; }
       .form-row { grid-template-columns: 1fr; }
+      .dest-add-grid { grid-template-columns: 1fr; }
+      .tg-qr-box { flex-direction: column; text-align: center; }
+      .tg-qr-actions { justify-content: center; }
     }
   </style>
 </head>
 <body>
+
+  <!-- PANTALLA DE LOGIN INSTITUCIONAL -->
+  <div id="loginOverlay" class="login-overlay">
+    <form id="loginForm" class="login-card" autocomplete="on">
+      <div class="login-header">
+        <img src="logo.png" alt="Hospital de la Madre y el Niño" onerror="this.style.display='none'">
+        <h2>Monitoreo de Cadena de Frío</h2>
+        <p>Hospital de la Madre y el Niño</p>
+      </div>
+
+      <div class="form-group">
+        <label for="loginEmail">Usuario Institucional</label>
+        <input type="email" id="loginEmail" class="form-control" placeholder="admin@hospital.local" autocomplete="username" required>
+      </div>
+
+      <div class="form-group">
+        <label for="loginPassword">Contraseña</label>
+        <input type="password" id="loginPassword" class="form-control" placeholder="Ingrese su contraseña" autocomplete="current-password" required>
+      </div>
+
+      <div id="loginFeedback" class="modal-feedback feedback-error"></div>
+
+      <button type="submit" class="btn-submit" id="btnLoginSubmit">
+        <i class="fa-solid fa-right-to-bracket"></i> Ingresar al Sistema
+      </button>
+    </form>
+  </div>
 
   <!-- BANNER NAVEGADOR SUPERIOR -->
   <navbar>
@@ -217,9 +280,12 @@
         <i class="fa-solid fa-file-csv"></i> Exportar Excel
       </button>
 
-      <!-- Interruptor Activar / Desactivar Alarma Sonora -->
       <button id="btnAudio" class="nav-btn btn-audio-on" onclick="toggleAlarmaSonora()">
         <i class="fa-solid fa-volume-high"></i> Alarma: ACTIVADA
+      </button>
+
+      <button class="nav-btn btn-logout" onclick="cerrarSesion()" title="Cerrar Sesión">
+        <i class="fa-solid fa-power-off"></i> Salir
       </button>
     </div>
   </navbar>
@@ -281,11 +347,11 @@
 
   </div>
 
-  <!-- MODAL 1: CONFIGURACIÓN DE RANGOS Y SENSORES -->
+  <!-- MODAL 1: CONFIGURACIÓN DE RANGOS, SENSORES, EMAILS Y QR TELEGRAM -->
   <div class="modal-overlay" id="modalRangos">
     <div class="modal-box">
       <div class="modal-header">
-        <h2><i class="fa-solid fa-sliders" style="color:var(--accent-teal);"></i> Configuración de Rangos y Sensores</h2>
+        <h2><i class="fa-solid fa-sliders" style="color:var(--accent-teal);"></i> Configuración del Sistema</h2>
         <button class="btn-close" onclick="cerrarModalRangos()"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
@@ -339,17 +405,51 @@
         </div>
       </div>
 
-      <div class="section-divider"><i class="fa-solid fa-lock"></i> Autorización Requerida</div>
-      <div class="form-group">
-        <label for="inputClave">Clave de Seguridad</label>
-        <input type="password" id="inputClave" class="form-control" placeholder="Ingrese la clave autorizada para guardar">
-      </div>
-
       <button class="btn-submit" onclick="guardarNuevosRangos()">
-        <i class="fa-solid fa-floppy-disk"></i> Guardar Configuración
+        <i class="fa-solid fa-floppy-disk"></i> Guardar Rangos y Sensores
       </button>
 
       <div id="modalFeedback" class="modal-feedback"></div>
+
+      <!-- GESTIÓN DE DESTINATARIOS DE ALERTAS (SOLO CORREO ELECTRÓNICO) -->
+      <div class="section-divider" style="margin-top: 24px;">
+        <i class="fa-solid fa-envelope"></i> Destinatarios de Alertas por Correo Electrónico
+      </div>
+      <p style="font-size: 0.78em; color: var(--text-muted); margin-bottom: 10px;">
+        Agregá las casillas institucionales o personales que recibirán las notificaciones por email ante una emergencia.
+      </p>
+
+      <div class="dest-add-grid">
+        <input type="text" id="destNombre" class="form-control" maxlength="60" placeholder="Nombre / Sector (ej: Farmacia)">
+        <input type="email" id="destValor" class="form-control" maxlength="100" placeholder="correo@ejemplo.com">
+        <button type="button" class="btn-add-dest" onclick="agregarDestinatario()">
+          <i class="fa-solid fa-plus"></i> Agregar
+        </button>
+      </div>
+
+      <ul id="listaDestinatarios" class="dest-list">
+        <li style="font-size:0.8em; color:var(--text-muted); text-align:center;">Cargando correos...</li>
+      </ul>
+
+      <!-- CANAL OFICIAL DE TELEGRAM (QR DE INVITACIÓN) -->
+      <div class="section-divider" style="margin-top: 24px;">
+        <i class="fa-brands fa-telegram"></i> Grupo Oficial de Alertas en Telegram
+      </div>
+      <div class="tg-qr-box">
+        <div id="telegramQrContainer" class="tg-qr-canvas" title="Escaneá con la cámara del celular"></div>
+        <div class="tg-qr-info">
+          <strong>Acceso directo para el personal de guardia</strong>
+          Escaneá este código QR con la cámara del celular para unirte automáticamente al grupo oficial de alertas instantáneas en Telegram.
+          <div class="tg-qr-actions">
+            <a href="https://t.me/+jZ0C3NUO3ANmZDRh" target="_blank" rel="noopener noreferrer" class="btn-tg-link">
+              <i class="fa-brands fa-telegram"></i> Abrir en Telegram
+            </a>
+            <button type="button" class="btn-tg-download" onclick="descargarQRTelegram()">
+              <i class="fa-solid fa-download"></i> Descargar QR
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Historial Reciente de Cambios -->
       <div class="section-divider" style="margin-top: 24px;"><i class="fa-solid fa-clock-rotate-left"></i> Últimas Modificaciones Registradas</div>
@@ -399,11 +499,6 @@
         </select>
       </div>
 
-      <div class="form-group">
-        <label for="inputClaveReinicio">Clave de Seguridad</label>
-        <input type="password" id="inputClaveReinicio" class="form-control" placeholder="Ingrese la clave autorizada">
-      </div>
-
       <button class="btn-submit btn-submit-warn" onclick="ejecutarReinicioGraficas()">
         <i class="fa-solid fa-broom"></i> Reiniciar Gráficas Ahora
       </button>
@@ -414,13 +509,14 @@
 
   <script>
     // ---------------------------------------------------------------------
-    // 1. CREDENCIALES SUPABASE Y CLAVE DE AUTORIZACIÓN
+    // 1. CONFIGURACIÓN GENERAL Y SEGURIDAD
     // ---------------------------------------------------------------------
     const SUPABASE_URL = 'https://irdjwuavnxigtcchrgeq.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_DipKudFI5KaHLFEzTy_LbA_LHimXyF1'; 
-    
-    const CLAVE_AUTORIZACION = 'HOSPITAL2026';
-    const MINUTOS_TIMEOUT_OFFLINE = 12; // Si no envía datos en >12 min, se marca SIN SEÑAL
+    const SUPABASE_KEY = 'sb_publishable_DipKudFI5KaHLFEzTy_LbA_LHimXyF1';
+    const TELEGRAM_INVITE_URL = 'https://t.me/+jZ0C3NUO3ANmZDRh';
+
+    const MINUTOS_TIMEOUT_OFFLINE = 12;
+    const MINUTOS_INACTIVIDAD_LOGOUT = 30;
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -429,9 +525,109 @@
     let miniCharts = {};
     let chartIndividualInstance = null;
     let ultimosRegistrosGlobales = [];
+    let intervaloPolling = null;
+    let timerInactividad = null;
+    let qrGenerado = false;
 
     let rangosPorHeladera = {};
 
+    // Sanitización estricta contra inyección XSS al renderizar textos de BD
+    function escapeHTML(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // ---------------------------------------------------------------------
+    // 1B. AUTENTICACIÓN Y SESIÓN (SUPABASE AUTH + AUTO-LOGOUT)
+    // ---------------------------------------------------------------------
+    async function exigirSesionActiva() {
+      const { data: { session }, error } = await _supabase.auth.getSession();
+      if (error || !session) {
+        await cerrarSesion(true);
+        return false;
+      }
+      return true;
+    }
+
+    function reiniciarRelojInactividad() {
+      if (timerInactividad) clearTimeout(timerInactividad);
+      timerInactividad = setTimeout(() => {
+        cerrarSesion(true);
+      }, MINUTOS_INACTIVIDAD_LOGOUT * 60 * 1000);
+    }
+
+    ['click', 'keydown', 'mousemove', 'touchstart'].forEach(evt => {
+      document.addEventListener(evt, reiniciarRelojInactividad, { passive: true });
+    });
+
+    async function verificarSesionInicial() {
+      const { data: { session } } = await _supabase.auth.getSession();
+      const overlay = document.getElementById('loginOverlay');
+
+      if (session) {
+        overlay.style.display = 'none';
+        reiniciarRelojInactividad();
+        iniciarSistemaMonitoreo();
+      } else {
+        overlay.style.display = 'flex';
+      }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('btnLoginSubmit');
+      const fb = document.getElementById('loginFeedback');
+
+      fb.style.display = 'none';
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando...';
+
+      const { error } = await _supabase.auth.signInWithPassword({ email, password });
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Ingresar al Sistema';
+
+      if (error) {
+        fb.innerText = 'Usuario o contraseña incorrectos.';
+        fb.style.display = 'block';
+      } else {
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginOverlay').style.display = 'none';
+        reiniciarRelojInactividad();
+        iniciarSistemaMonitoreo();
+      }
+    });
+
+    async function cerrarSesion(silencioso = false) {
+      if (intervaloPolling) clearInterval(intervaloPolling);
+      if (timerInactividad) clearTimeout(timerInactividad);
+      detenerTonoAlarma();
+      await _supabase.auth.signOut();
+      if (silencioso) {
+        document.getElementById('loginOverlay').style.display = 'flex';
+      } else {
+        location.reload();
+      }
+    }
+
+    function iniciarSistemaMonitoreo() {
+      actualizarBotonAudioUI();
+      obtenerDatos();
+      if (!intervaloPolling) {
+        intervaloPolling = setInterval(obtenerDatos, 10000);
+      }
+    }
+
+    // ---------------------------------------------------------------------
+    // UTILIDADES DE RANGOS Y TEMPERATURAS
+    // ---------------------------------------------------------------------
     function obtenerRangoEquipo(id) {
       const key = String(id).trim();
       return rangosPorHeladera[key] || { 
@@ -582,8 +778,40 @@
     }
 
     // ---------------------------------------------------------------------
-    // 3. GESTIÓN DE RANGOS, SENSORES Y REINICIO DE GRÁFICAS
+    // 3. GESTIÓN DE RANGOS, SENSORES, CORREOS, QR TELEGRAM Y REINICIO
     // ---------------------------------------------------------------------
+    function renderizarQRTelegram() {
+      if (qrGenerado) return;
+      const contenedor = document.getElementById('telegramQrContainer');
+      if (!contenedor || typeof QRCode === 'undefined') return;
+
+      contenedor.innerHTML = '';
+      new QRCode(contenedor, {
+        text: TELEGRAM_INVITE_URL,
+        width: 112,
+        height: 112,
+        colorDark: '#0F172A',
+        colorLight: '#FFFFFF',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+      qrGenerado = true;
+    }
+
+    function descargarQRTelegram() {
+      const contenedor = document.getElementById('telegramQrContainer');
+      const canvas = contenedor.querySelector('canvas');
+      const img = contenedor.querySelector('img');
+      const dataUrl = canvas ? canvas.toDataURL('image/png') : (img ? img.src : null);
+
+      if (!dataUrl) return;
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = 'QR_Grupo_Alertas_Telegram_HMyN.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
     async function cargarRangosConfigurados() {
       const errorDiv = document.getElementById('errorConsole');
       const { data, error } = await _supabase
@@ -612,12 +840,14 @@
       }
     }
 
-    function abrirModalRangos() {
+    async function abrirModalRangos() {
+      if (!(await exigirSesionActiva())) return;
       document.getElementById('modalRangos').style.display = 'flex';
-      document.getElementById('inputClave').value = '';
       ocultarFeedback('modalFeedback');
       actualizarSelectoresEquipos();
       precargarValoresModal();
+      renderizarQRTelegram();
+      cargarDestinatarios();
       cargarHistorialCambios();
     }
 
@@ -625,9 +855,9 @@
       document.getElementById('modalRangos').style.display = 'none';
     }
 
-    function abrirModalReinicio() {
+    async function abrirModalReinicio() {
+      if (!(await exigirSesionActiva())) return;
       document.getElementById('modalReinicio').style.display = 'flex';
-      document.getElementById('inputClaveReinicio').value = '';
       ocultarFeedback('resetFeedback');
       actualizarSelectoresEquipos();
     }
@@ -663,9 +893,10 @@
       selectNav.innerHTML = '';
 
       ids.forEach(id => {
-        selectModal.innerHTML += `<option value="${id}">Heladera N° ${id}</option>`;
-        selectReinicio.innerHTML += `<option value="${id}">Heladera N° ${id}</option>`;
-        selectNav.innerHTML += `<option value="${id}">Heladera N° ${id}</option>`;
+        const safeId = escapeHTML(id);
+        selectModal.innerHTML += `<option value="${safeId}">Heladera N° ${safeId}</option>`;
+        selectReinicio.innerHTML += `<option value="${safeId}">Heladera N° ${safeId}</option>`;
+        selectNav.innerHTML += `<option value="${safeId}">Heladera N° ${safeId}</option>`;
       });
 
       if (ids.includes(prevModal)) selectModal.value = prevModal;
@@ -699,12 +930,88 @@
       document.getElementById(elementId).style.display = 'none';
     }
 
-    async function ejecutarReinicioGraficas() {
-      const clave = document.getElementById('inputClaveReinicio').value.trim();
-      if (clave !== CLAVE_AUTORIZACION) {
-        mostrarFeedback('resetFeedback', 'Clave de seguridad incorrecta. Acceso denegado.', true);
+    // --- Gestión de Destinatarios de Alertas (Solo Email) ---
+    async function cargarDestinatarios() {
+      const lista = document.getElementById('listaDestinatarios');
+      const { data, error } = await _supabase
+        .from('destinatarios_alertas')
+        .select('*')
+        .eq('tipo', 'email')
+        .order('id', { ascending: true });
+
+      if (error) {
+        lista.innerHTML = `<li style="color:#B91C1C; font-size:0.8em;">Error cargando correos: ${escapeHTML(error.message)}</li>`;
         return;
       }
+
+      if (!data || data.length === 0) {
+        lista.innerHTML = '<li style="font-size:0.8em; color:var(--text-muted); text-align:center;">No hay correos cargados aún.</li>';
+        return;
+      }
+
+      lista.innerHTML = data.map(d => {
+        const safeId = Number(d.id);
+        return `
+          <li class="dest-item">
+            <div class="dest-item-info">
+              <span class="dest-tag-email"><i class="fa-solid fa-envelope"></i> Email</span>
+              <strong>${escapeHTML(d.nombre)}</strong>
+              <span style="color:var(--text-muted);">(${escapeHTML(d.destino)})</span>
+            </div>
+            <button type="button" class="btn-del-dest" onclick="eliminarDestinatario(${safeId})">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </li>
+        `;
+      }).join('');
+    }
+
+    async function agregarDestinatario() {
+      if (!(await exigirSesionActiva())) return;
+
+      const nombre = document.getElementById('destNombre').value.trim();
+      const destino = document.getElementById('destValor').value.trim().toLowerCase();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!nombre || !destino) {
+        mostrarFeedback('modalFeedback', 'Completá el nombre/sector y el correo electrónico.', true);
+        return;
+      }
+
+      if (!emailRegex.test(destino)) {
+        mostrarFeedback('modalFeedback', 'Ingresá una dirección de correo electrónico válida.', true);
+        return;
+      }
+
+      const { error } = await _supabase
+        .from('destinatarios_alertas')
+        .insert([{ nombre, tipo: 'email', destino }]);
+
+      if (error) {
+        mostrarFeedback('modalFeedback', `Error al agregar correo: ${error.message}`, true);
+        return;
+      }
+
+      document.getElementById('destNombre').value = '';
+      document.getElementById('destValor').value = '';
+      ocultarFeedback('modalFeedback');
+      cargarDestinatarios();
+    }
+
+    async function eliminarDestinatario(id) {
+      if (!(await exigirSesionActiva())) return;
+
+      const { error } = await _supabase
+        .from('destinatarios_alertas')
+        .delete()
+        .eq('id', Number(id));
+
+      if (!error) cargarDestinatarios();
+    }
+
+    // --- Reinicio de Gráficas ---
+    async function ejecutarReinicioGraficas() {
+      if (!(await exigirSesionActiva())) return;
 
       const alcance = document.getElementById('alcanceReinicio').value;
       const ahoraISO = new Date().toISOString();
@@ -735,7 +1042,6 @@
         }
       }
 
-      document.getElementById('inputClaveReinicio').value = '';
       mostrarFeedback('resetFeedback', 'Gráficas reiniciadas. Esperando nuevas lecturas...', false);
 
       await cargarRangosConfigurados();
@@ -746,12 +1052,9 @@
       }, 1500);
     }
 
+    // --- Guardar Nuevos Rangos ---
     async function guardarNuevosRangos() {
-      const clave = document.getElementById('inputClave').value.trim();
-      if (clave !== CLAVE_AUTORIZACION) {
-        mostrarFeedback('modalFeedback', 'Clave de seguridad incorrecta. Acceso denegado.', true);
-        return;
-      }
+      if (!(await exigirSesionActiva())) return;
 
       const modo = document.getElementById('modoAplicacion').value;
       const invertidos = document.getElementById('selectAsignacionSensores').value === 'true';
@@ -831,7 +1134,6 @@
           sensores_invertidos: invertidos
         });
 
-      document.getElementById('inputClave').value = '';
       mostrarFeedback('modalFeedback', 'Configuración guardada correctamente.', false);
       
       await cargarRangosConfigurados();
@@ -858,19 +1160,19 @@
         });
         const alcance = row.tipo_aplicacion === 'GENERAL' 
           ? '<strong>Todas</strong>' 
-          : `N° ${row.heladera_id}`;
+          : `N° ${escapeHTML(row.heladera_id)}`;
         const textoSensores = row.sensores_invertidos 
           ? 'S1:Freez / S2:Hel' 
           : 'S1:Hel / S2:Freez';
         const textoFreezer = row.freezer_min !== null 
-          ? `${row.freezer_min}° a ${row.freezer_max}°` 
-          : `≤ ${row.freezer_max}°`;
+          ? `${Number(row.freezer_min)}° a ${Number(row.freezer_max)}°` 
+          : `≤ ${Number(row.freezer_max)}°`;
         return `
           <tr>
-            <td>${fecha}</td>
+            <td>${escapeHTML(fecha)}</td>
             <td>${alcance}</td>
             <td>${textoSensores}</td>
-            <td>${row.heladera_min}° a ${row.heladera_max}°</td>
+            <td>${Number(row.heladera_min)}° a ${Number(row.heladera_max)}°</td>
             <td>${textoFreezer}</td>
           </tr>
         `;
@@ -878,9 +1180,11 @@
     }
 
     // ---------------------------------------------------------------------
-    // 4. EXPORTAR REPORTE CSV (EXCEL PARA AUDITORÍA HOSPITALARIA)
+    // 4. EXPORTAR REPORTE CSV
     // ---------------------------------------------------------------------
-    function exportarCSV() {
+    async function exportarCSV() {
+      if (!(await exigirSesionActiva())) return;
+
       if (!ultimosRegistrosGlobales || ultimosRegistrosGlobales.length === 0) {
         alert('No hay datos disponibles para exportar.');
         return;
@@ -913,10 +1217,11 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
 
     // ---------------------------------------------------------------------
-    // 5. CAMBIO DE VISTAS (Navegación)
+    // 5. CAMBIO DE VISTAS
     // ---------------------------------------------------------------------
     function setVista(modo) {
       vistaActual = modo;
@@ -947,9 +1252,11 @@
     }
 
     // ---------------------------------------------------------------------
-    // 6. LÓGICA PRINCIPAL DE DATOS (Supabase + Filtro por Reinicio)
+    // 6. LÓGICA PRINCIPAL DE DATOS
     // ---------------------------------------------------------------------
     async function obtenerDatos() {
+      if (!(await exigirSesionActiva())) return;
+
       const errorDiv = document.getElementById('errorConsole');
       errorDiv.innerText = '';
       actualizarBotonAudioUI();
@@ -1022,6 +1329,7 @@
         const registros = medicionesPorHeladera[id];
         if (!registros || registros.length === 0) return;
 
+        const safeId = escapeHTML(id);
         const ultimo = registros[0];
         const rango = obtenerRangoEquipo(id);
         const { tempH, tempF, sensorH, sensorF } = extraerTemperaturasReales(ultimo, rango);
@@ -1036,7 +1344,7 @@
           grid.innerHTML += `
             <div class="heladera-card in-alert">
               <div class="card-header">
-                <span class="card-title" style="color: var(--alert-red)"><i class="fa-solid fa-box-archive"></i> Heladera N° ${id}</span>
+                <span class="card-title" style="color: var(--alert-red)"><i class="fa-solid fa-box-archive"></i> Heladera N° ${safeId}</span>
                 <span class="card-badge badge-alert"><i class="fa-solid fa-triangle-exclamation"></i> CRÍTICO</span>
               </div>
               <div style="font-size: 0.9em; line-height: 1.5; color: #7F1D1D; font-weight:600;">
@@ -1064,6 +1372,7 @@
       const container = document.getElementById('vistaGeneral');
       
       Object.keys(medicionesPorHeladera).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).forEach(id => {
+        const safeId = escapeHTML(id);
         let card = document.getElementById(`card-general-${id}`);
         if (!card) {
           card = document.createElement('div');
@@ -1086,7 +1395,7 @@
           card.className = 'heladera-card';
           card.innerHTML = `
             <div class="card-header">
-              <span class="card-title"><i class="fa-solid fa-box-archive" style="color:var(--accent-teal);"></i> Heladera N° ${id}</span>
+              <span class="card-title"><i class="fa-solid fa-box-archive" style="color:var(--accent-teal);"></i> Heladera N° ${safeId}</span>
               <span class="card-badge badge-waiting"><i class="fa-solid fa-hourglass-half"></i> ESPERANDO</span>
             </div>
             <div class="card-body">
@@ -1139,7 +1448,7 @@
         card.className = cardClase;
         card.innerHTML = `
           <div class="card-header">
-            <span class="card-title"><i class="fa-solid fa-box-archive" style="color:var(--accent-teal);"></i> Heladera N° ${id}</span>
+            <span class="card-title"><i class="fa-solid fa-box-archive" style="color:var(--accent-teal);"></i> Heladera N° ${safeId}</span>
             ${badgeHTML}
           </div>
           <div class="card-body">
@@ -1162,7 +1471,7 @@
               </div>
             </div>
             <div class="card-chart-mini">
-              <canvas id="mini-chart-${id}"></canvas>
+              <canvas id="mini-chart-${safeId}"></canvas>
             </div>
           </div>
           <div class="card-footer-meta">
@@ -1297,11 +1606,9 @@
     }
 
     // ---------------------------------------------------------------------
-    // INICIALIZACIÓN PERIÓDICA
+    // ARRANQUE VERIFICANDO SESIÓN ACTIVA
     // ---------------------------------------------------------------------
-    actualizarBotonAudioUI();
-    obtenerDatos();
-    setInterval(obtenerDatos, 10000);
+    verificarSesionInicial();
   </script>
 </body>
 </html>
