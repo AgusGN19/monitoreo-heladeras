@@ -1,0 +1,25 @@
+{
+  "name": "Monitoreo Cadena de Frío - Hospital de la Madre y el Niño",
+  "short_name": "Cadena de Frío",
+  "description": "Sistema de monitoreo en tiempo real de heladeras y freezers hospitalarios.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0F172A",
+  "theme_color": "#29A19C",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

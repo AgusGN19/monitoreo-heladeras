@@ -1209,6 +1209,14 @@ function renderizarVistaIndividual(registros, id) {
 }
 
 // ---------------------------------------------------------------------
-// ARRANQUE VERIFICANDO SESIÓN ACTIVA
+// ARRANQUE VERIFICANDO SESIÓN ACTIVA Y REGISTRO PWA
 // ---------------------------------------------------------------------
 verificarSesionInicial();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch((err) => {
+      console.warn('No se pudo registrar el Service Worker:', err);
+    });
+  });
+}
