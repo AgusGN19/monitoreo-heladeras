@@ -1,13 +1,13 @@
-const CACHE_NAME = 'cadena-frio-hmyn-v1';
+const CACHE_NAME = 'cadena-frio-hmyn-v2';
 const ASSETS_ESTATICOS = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './manifest.json',
-  './logo.png'
+  './logo.png',
+  './icon-app.png'
 ];
-
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_ESTATICOS))
