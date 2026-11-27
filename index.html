@@ -6,7 +6,7 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob:; connect-src 'self' https://irdjwuavnxigtcchrgeq.supabase.co wss://irdjwuavnxigtcchrgeq.supabase.co;">
   <title>Sistema de Monitoreo - Hospital de la Madre y el Niño</title>
-
+ 
   <!-- Configuración PWA (Instalación como App en Android / iOS) -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#29A19C">
@@ -59,40 +59,46 @@
     </form>
   </div>
 
-  <!-- BANNER NAVEGADOR SUPERIOR -->
+  <!-- BANNER NAVEGADOR SUPERIOR CON MENÚ HAMBURGUESA MÓVIL -->
   <navbar>
-    <div class="nav-brand">
-      <div class="nav-logo-box">
-        <img src="logo.png" alt="Hospital de la Madre y el Niño" class="nav-logo-img">
+    <div class="nav-top-row">
+      <div class="nav-brand">
+        <div class="nav-logo-box">
+          <img src="logo.png" alt="Hospital de la Madre y el Niño" class="nav-logo-img">
+        </div>
+        <div class="nav-title">Monitoreo de Cadena de Frío</div>
       </div>
-      <div class="nav-title">Monitoreo de Cadena de Frío</div>
+
+      <button id="btnMobileMenu" class="hamburger-btn" type="button" aria-label="Abrir menú" aria-expanded="false" onclick="toggleMobileMenu()">
+        <i class="fa-solid fa-bars"></i>
+      </button>
     </div>
 
-    <div class="nav-controls">
-      <button id="btnViewGeneral" class="nav-btn active" onclick="setVista('general')">
+    <div class="nav-controls" id="navControls">
+      <button id="btnViewGeneral" class="nav-btn active" onclick="setVista('general'); cerrarMobileMenu();">
         <i class="fa-solid fa-border-all"></i> General
       </button>
-      <button id="btnViewSingle" class="nav-btn" onclick="setVista('individual')">
+      <button id="btnViewSingle" class="nav-btn" onclick="setVista('individual'); cerrarMobileMenu();">
         <i class="fa-solid fa-chart-line"></i> Detallada
       </button>
       
-      <select id="selectHeladeraNav" class="nav-select" style="display: none;" onchange="cambiarHeladeraIndividual()">
+      <select id="selectHeladeraNav" class="nav-select" style="display: none;" onchange="cambiarHeladeraIndividual(); cerrarMobileMenu();">
         <option value="1">Heladera N° 1</option>
       </select>
 
-      <button class="nav-btn btn-config" onclick="abrirModalRangos()">
+      <button class="nav-btn btn-config" onclick="abrirModalRangos(); cerrarMobileMenu();">
         <i class="fa-solid fa-sliders"></i> Configurar
       </button>
 
-      <button class="nav-btn btn-reset" onclick="abrirModalReinicio()">
+      <button class="nav-btn btn-reset" onclick="abrirModalReinicio(); cerrarMobileMenu();">
         <i class="fa-solid fa-rotate-left"></i> Reiniciar Gráficas
       </button>
 
-      <button class="nav-btn btn-export" onclick="exportarCSV()">
+      <button class="nav-btn btn-export" onclick="exportarCSV(); cerrarMobileMenu();">
         <i class="fa-solid fa-file-csv"></i> Exportar Excel
       </button>
 
-      <button id="btnAudio" class="nav-btn btn-audio-on" onclick="toggleAlarmaSonora()">
+      <button id="btnAudio" class="nav-btn btn-audio-on" onclick="toggleAlarmaSonora(); cerrarMobileMenu();">
         <i class="fa-solid fa-volume-high"></i> Alarma: ACTIVADA
       </button>
 
@@ -104,12 +110,12 @@
 
   <div class="content">
 
-    <!-- SECCIÓN DE EMERGENCIAS -->
+    <!-- SECCIÓN DE EMERGENCIAS COMPACTA -->
     <div class="emergency-banner" id="emergencyBanner">
       <div class="emergency-header">
         <div class="emergency-title">
           <i class="fa-solid fa-triangle-exclamation fa-lg" style="color:#FECACA;"></i>
-          EMERGENCIA: HELADERAS CRÍTICAS
+          EMERGENCIA: EQUIPOS CRÍTICOS
         </div>
         <div class="emergency-actions">
           <button class="btn-snooze" onclick="silenciarTemporalmente(15)">
@@ -131,8 +137,9 @@
       <div class="single-metrics-container">
         <div class="metric-box" id="singleCardH">
           <div class="metric-title">
+            <span class="color-dot dot-heladera"></span>
             <i class="fa-solid fa-temperature-three-quarters" style="color:var(--accent-teal);"></i>
-            Heladera <span class="sensor-tag" id="singleSensorTagH">Sensor 1</span>
+            <span id="singleLabelH">Heladera</span> <span class="sensor-tag" id="singleSensorTagH">Sensor 1</span>
           </div>
           <div class="metric-value" id="singleTempH">-- °C</div>
           <div class="temp-range-hint" id="singleRangeH" style="margin-bottom: 10px;">Rango: --</div>
@@ -140,8 +147,9 @@
         </div>
         <div class="metric-box" id="singleCardF">
           <div class="metric-title">
+            <span class="color-dot dot-freezer"></span>
             <i class="fa-solid fa-snowflake" style="color:var(--text-muted);"></i>
-            Freezer <span class="sensor-tag" id="singleSensorTagF">Sensor 2</span>
+            <span id="singleLabelF">Freezer</span> <span class="sensor-tag" id="singleSensorTagF">Sensor 2</span>
           </div>
           <div class="metric-value" id="singleTempF">-- °C</div>
           <div class="temp-range-hint" id="singleRangeF" style="margin-bottom: 10px;">Rango: --</div>
@@ -150,7 +158,19 @@
       </div>
 
       <div class="single-chart-container">
-        <canvas id="chartIndividual"></canvas>
+        <div class="chart-time-toolbar">
+          <span class="chart-time-label"><i class="fa-regular fa-clock"></i> Rango histórico:</span>
+          <div class="chart-time-buttons" id="chartRangeButtons">
+            <button type="button" class="time-btn active" data-horas="2" onclick="cambiarRangoGrafico(2, this)">2 h</button>
+            <button type="button" class="time-btn" data-horas="6" onclick="cambiarRangoGrafico(6, this)">6 h</button>
+            <button type="button" class="time-btn" data-horas="12" onclick="cambiarRangoGrafico(12, this)">12 h</button>
+            <button type="button" class="time-btn" data-horas="24" onclick="cambiarRangoGrafico(24, this)">24 h</button>
+            <button type="button" class="time-btn" data-horas="168" onclick="cambiarRangoGrafico(168, this)">7 días</button>
+          </div>
+        </div>
+        <div class="single-chart-canvas-wrap">
+          <canvas id="chartIndividual"></canvas>
+        </div>
       </div>
     </div>
 
@@ -159,7 +179,7 @@
 
   </div>
 
-  <!-- MODAL 1: CONFIGURACIÓN DE RANGOS, SENSORES, EMAILS, QR Y HARDWARE -->
+  <!-- MODAL 1: CONFIGURACIÓN DE RANGOS, NOMBRES, SENSORES, EMAILS, QR Y HARDWARE -->
   <div class="modal-overlay" id="modalRangos">
     <div class="modal-box">
       <div class="modal-header">
@@ -171,8 +191,8 @@
         <div class="form-group">
           <label for="modoAplicacion">Modo de Aplicación</label>
           <select id="modoAplicacion" class="form-control" onchange="toggleSelectHeladeraModal()">
-            <option value="INDIVIDUAL">Individual (Una heladera específica)</option>
-            <option value="GENERAL">Generalizado (Todas las heladeras)</option>
+            <option value="INDIVIDUAL">Individual (Un equipo específico)</option>
+            <option value="GENERAL">Generalizado (Todos los equipos)</option>
           </select>
         </div>
 
@@ -184,16 +204,43 @@
         </div>
       </div>
 
+      <div class="section-divider"><i class="fa-solid fa-tag"></i> Identificación de Equipo y Sondas</div>
+      <div class="info-box-warn" style="margin-bottom: 12px; font-size: 0.8em; line-height: 1.5;">
+        <div style="font-weight: 800; margin-bottom: 4px;">
+          <i class="fa-solid fa-shield-halved"></i> Reglas obligatorias al nombrar:
+        </div>
+        <ul style="padding-left: 18px; margin: 0;">
+          <li>Usá <strong>nombres claros y representativos del sector o contenido</strong> (ej: <em>"Lab. Vacunas"</em>, <em>"Freezer Plasma"</em>). Evitá textos genéricos como <em>"prueba"</em> o <em>"equipo"</em>.</li>
+          <li><strong>No repitas el mismo nombre</strong> en ambos canales para evitar confusiones durante una emergencia.</li>
+          <li><strong>Cambiar el nombre NO cambia la temperatura de alarma:</strong> si asignás una sonda a otra heladera o freezer, verificá y guardá también sus límites (°C) abajo.</li>
+        </ul>
+      </div>
+
+      <div class="form-group" id="grupoNombreEquipo">
+        <label for="inputNombreEquipo">Nombre del Equipo / Sector <span style="font-weight:400; color:var(--text-muted);">(Ej: Heladera N° 1 - Laboratorio)</span></label>
+        <input type="text" id="inputNombreEquipo" class="form-control" maxlength="40" placeholder="Ej: Heladera N° 1 - Farmacia">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="inputNombreCanal1">Nombre Canal 1 (Curva Verde)</label>
+          <input type="text" id="inputNombreCanal1" class="form-control" maxlength="25" value="Heladera" placeholder="Ej: Heladera Vacunas">
+        </div>
+        <div class="form-group">
+          <label for="inputNombreCanal2">Nombre Canal 2 (Curva Gris)</label>
+          <input type="text" id="inputNombreCanal2" class="form-control" maxlength="25" value="Freezer" placeholder="Ej: Freezer Reactivos">
+        </div>
+      </div>
+
       <div class="section-divider"><i class="fa-solid fa-shuffle"></i> Asignación de Sondas Físicas (Sensores)</div>
       <div class="form-group">
-        <label for="selectAsignacionSensores">¿Qué sensor mide cada compartimento?</label>
+        <label for="selectAsignacionSensores">¿Qué sensor mide cada canal?</label>
         <select id="selectAsignacionSensores" class="form-control">
-          <option value="false">Sensor 1 (PIN 4) → Heladera  |  Sensor 2 (PIN 5) → Freezer (Estándar)</option>
-          <option value="true">Sensor 1 (PIN 4) → Freezer  |  Sensor 2 (PIN 5) → Heladera (Invertido)</option>
+          <option value="false">Sensor 1 (PIN 4) → Canal 1  |  Sensor 2 (PIN 5) → Canal 2 (Estándar)</option>
+          <option value="true">Sensor 1 (PIN 4) → Canal 2  |  Sensor 2 (PIN 5) → Canal 1 (Invertido)</option>
         </select>
       </div>
 
-      <div class="section-divider"><i class="fa-solid fa-temperature-three-quarters"></i> Límites Compartimento Heladera (°C)</div>
+      <div class="section-divider"><i class="fa-solid fa-temperature-three-quarters"></i> Límites Canal 1 (°C)</div>
       <div class="form-row">
         <div class="form-group">
           <label for="inputHMin">Temperatura Mínima (°C)</label>
@@ -205,7 +252,7 @@
         </div>
       </div>
 
-      <div class="section-divider"><i class="fa-solid fa-snowflake"></i> Límites Compartimento Freezer (°C)</div>
+      <div class="section-divider"><i class="fa-solid fa-snowflake"></i> Límites Canal 2 (°C)</div>
       <div class="form-row">
         <div class="form-group">
           <label for="inputFMin">Mínima (°C) <span style="font-weight:400; color:var(--text-muted);">(Vacío = sin límite / -∞)</span></label>
@@ -218,7 +265,7 @@
       </div>
 
       <button class="btn-submit" onclick="guardarNuevosRangos()">
-        <i class="fa-solid fa-floppy-disk"></i> Guardar Rangos y Sensores
+        <i class="fa-solid fa-floppy-disk"></i> Guardar Configuración y Rangos
       </button>
 
       <div id="modalFeedback" class="modal-feedback"></div>
@@ -272,8 +319,8 @@
               <th>Fecha y Hora</th>
               <th>Alcance</th>
               <th>Sensores</th>
-              <th>Heladera</th>
-              <th>Freezer</th>
+              <th>Canal 1</th>
+              <th>Canal 2</th>
             </tr>
           </thead>
           <tbody id="tablaHistorialBody">
@@ -336,7 +383,7 @@
         <label for="alcanceReinicio">¿Qué gráficas deseás reiniciar?</label>
         <select id="alcanceReinicio" class="form-control" onchange="toggleSelectHeladeraReinicio()">
           <option value="GENERAL">Todas las heladeras (Reinicio global)</option>
-          <option value="INDIVIDUAL">Una heladera específica</option>
+          <option value="INDIVIDUAL">Un equipo específico</option>
         </select>
       </div>
 

@@ -28,10 +28,29 @@ body { font-family: var(--font-main); background-color: var(--bg-light); color: 
 
 /* Barra de Navegación */
 navbar { background-color: var(--card-bg); border-bottom: 3px solid var(--accent-teal); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.nav-top-row { display: flex; align-items: center; justify-content: space-between; }
 .nav-brand { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .nav-logo-box { display: flex; align-items: center; }
 .nav-logo-img { height: 46px; width: auto; object-fit: contain; }
 .nav-title { font-size: 1.1em; font-weight: 700; color: var(--text-dark); border-left: 2px solid var(--border-color); padding-left: 16px; letter-spacing: -0.01em; }
+
+.hamburger-btn {
+  display: none;
+  background: #F8FAFC;
+  color: var(--text-dark);
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.15em;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+.hamburger-btn:hover { background: #E2E8F0; }
+.hamburger-btn.is-open { background: var(--accent-teal); color: #FFFFFF; border-color: var(--accent-teal); }
 
 .nav-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .nav-btn { background: #F8FAFC; color: var(--text-dark); border: 1px solid #CBD5E1; padding: 8px 13px; border-radius: 8px; font-family: var(--font-main); font-size: 0.84em; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px; }
@@ -55,45 +74,142 @@ select.nav-select { padding: 8px 12px; border-radius: 8px; border: 1px solid var
 /* Main Container */
 .content { max-width: 1320px; margin: 24px auto; padding: 0 15px; }
 
-/* Banner Superior para Heladeras en Emergencia */
-.emergency-banner { background-color: var(--alert-red-dark); border: 2px solid var(--alert-red); border-radius: 12px; padding: 18px 22px; margin-bottom: 24px; display: none; box-shadow: 0 0 20px rgba(220, 38, 38, 0.4); animation: pulseGlow 1.5s infinite alternate; color: white; }
-.emergency-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
-.emergency-title { color: #FECACA; font-size: 1em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; }
+/* Banner Superior Compacto para Equipos en Emergencia */
+.emergency-banner { background-color: var(--alert-red-dark); border: 2px solid var(--alert-red); border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: none; box-shadow: 0 0 20px rgba(220, 38, 38, 0.4); animation: pulseGlow 1.5s infinite alternate; color: #FFFFFF; }
+.emergency-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.emergency-title { color: #FFFFFF; font-size: 0.95em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; display: flex; align-items: center; gap: 8px; }
 .emergency-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.btn-snooze { background: #F59E0B; color: #0F172A; border: none; padding: 7px 14px; border-radius: 7px; font-family: var(--font-main); font-size: 0.82em; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.btn-snooze { background: #F59E0B; color: #0F172A; border: none; padding: 6px 12px; border-radius: 7px; font-family: var(--font-main); font-size: 0.8em; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
 .btn-snooze:hover { background: #FBBF24; }
-.btn-mute-banner { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 7px 14px; border-radius: 7px; font-family: var(--font-main); font-size: 0.82em; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-.btn-mute-banner:hover { background: rgba(255,255,255,0.25); }
-.emergency-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.btn-mute-banner { background: rgba(255,255,255,0.18); color: #FFFFFF; border: 1px solid rgba(255,255,255,0.35); padding: 6px 12px; border-radius: 7px; font-family: var(--font-main); font-size: 0.8em; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.btn-mute-banner:hover { background: rgba(255,255,255,0.28); }
+
+.emergency-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; }
+
+.emergency-item-compact {
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(254, 202, 202, 0.45);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.emergency-item-compact:hover { background: rgba(0, 0, 0, 0.42); }
+.emergency-item-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-weight: 800; font-size: 0.9em; color: #FFFFFF; }
+.emergency-item-details { font-size: 0.82em; line-height: 1.4; color: #F8FAFC; }
+.emergency-item-details strong { color: #FEF08A; font-size: 1.05em; }
+
+/* Punto indicador del color de la curva */
+.color-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-heladera {
+  background-color: #29A19C;
+  box-shadow: 0 0 0 2px rgba(41, 161, 156, 0.25);
+}
+.dot-freezer {
+  background-color: #64748B;
+  box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.25);
+}
 
 /* Vista General: Grid de Tarjetas Resumen */
 .grid-heladeras { display: grid; grid-template-columns: repeat(auto-fill, minmax(365px, 1fr)); gap: 20px; }
-.heladera-card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); border-top: 4px solid var(--accent-teal); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+.heladera-card { background: var(--card-bg); border-radius: 12px; padding: 18px 20px; border: 1px solid var(--border-color); border-top: 4px solid var(--accent-teal); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
 .heladera-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
 
 .heladera-card.in-alert { border-top-color: var(--alert-red); border-left: 2px solid var(--alert-red); border-right: 2px solid var(--alert-red); border-bottom: 2px solid var(--alert-red); background: #FEF2F2; box-shadow: 0 0 15px rgba(220, 38, 38, 0.25); animation: cardAlertPulse 2s infinite; }
 .heladera-card.in-offline { border-top-color: var(--warn-amber); border-left: 2px solid #F59E0B; border-right: 2px solid #F59E0B; border-bottom: 2px solid #F59E0B; background: var(--warn-amber-bg); }
 
-.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 8px; }
-.card-title { font-size: 1.08em; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
+.card-title { font-size: 1.05em; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
 .card-badge { font-size: 0.72em; padding: 4px 9px; border-radius: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
 .badge-ok { background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
 .badge-alert { background: var(--alert-red); color: white; border: 1px solid #B91C1C; animation: blink 1s infinite; }
 .badge-offline { background: #F59E0B; color: #0F172A; border: 1px solid #D97706; }
 .badge-waiting { background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; }
 
-.card-body { display: flex; gap: 15px; align-items: center; }
-.card-temps { flex: 1; }
-.temp-item { margin-bottom: 12px; }
-.temp-item:last-child { margin-bottom: 0; }
-.temp-label { font-size: 0.76em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; display: flex; align-items: center; gap: 6px; }
-.sensor-tag { background: #E2E8F0; color: #334155; font-size: 0.85em; padding: 1px 6px; border-radius: 4px; font-weight: 700; text-transform: none; }
-.temp-range-hint { font-size: 0.72em; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
-.temp-val { font-size: 1.65em; font-weight: 800; color: var(--text-dark); font-variant-numeric: tabular-nums; margin-top: 2px; }
+/* Cuerpo de Tarjeta: 2 Cajas de Temperatura Arriba + Gráfica Detallada Abajo */
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-temps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.temp-item {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 0;
+}
+
+.heladera-card.in-alert .temp-item {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: #FECACA;
+}
+
+.temp-label {
+  font-size: 0.74em;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.sensor-tag {
+  background: #E2E8F0;
+  color: #334155;
+  font-size: 0.85em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.temp-range-hint {
+  font-size: 0.7em;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.temp-val {
+  font-size: 1.48em;
+  font-weight: 800;
+  color: var(--text-dark);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
 .temp-val.critical { color: var(--alert-red); }
 
-.card-chart-mini { width: 165px; height: 100px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; }
-.card-footer-meta { font-size: 0.72em; color: #64748B; margin-top: 12px; padding-top: 8px; border-top: 1px dashed #CBD5E1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+.card-chart-mini {
+  width: 100%;
+  height: 125px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card-footer-meta { font-size: 0.72em; color: #64748B; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #CBD5E1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
 
 /* Vista Individual Detallada */
 .single-view { display: none; flex-direction: column; gap: 20px; }
@@ -103,7 +219,64 @@ select.nav-select { padding: 8px 12px; border-radius: 8px; border: 1px solid var
 .metric-title { font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .metric-value { font-size: 2.6em; font-weight: 800; margin: 8px 0 8px 0; color: var(--text-dark); font-variant-numeric: tabular-nums; }
 
-.single-chart-container { background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color); margin-top: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); position: relative; width: 100%; height: 480px; }
+.single-chart-container {
+  background: var(--card-bg);
+  padding: 20px 24px 24px 24px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  margin-top: 5px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.chart-time-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.chart-time-label {
+  font-size: 0.84em;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart-time-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.time-btn {
+  background: #F8FAFC;
+  color: var(--text-dark);
+  border: 1px solid #CBD5E1;
+  padding: 6px 12px;
+  border-radius: 7px;
+  font-family: var(--font-main);
+  font-size: 0.8em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.time-btn:hover { background: #E2E8F0; }
+.time-btn.active { background: var(--accent-teal); color: #FFFFFF; border-color: var(--accent-teal); box-shadow: 0 2px 5px rgba(41, 161, 156, 0.28); }
+
+.single-chart-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 440px;
+}
 
 /* Modales */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(3px); z-index: 1000; justify-content: center; align-items: center; padding: 15px; overflow-y: auto; }
@@ -185,22 +358,61 @@ select.nav-select { padding: 8px 12px; border-radius: 8px; border: 1px solid var
 @keyframes cardAlertPulse { 0% { border-color: var(--alert-red); } 50% { border-color: #991B1B; } 100% { border-color: var(--alert-red); } }
 
 @media (max-width: 768px) {
-  navbar { padding: 12px 16px; flex-direction: column; align-items: stretch; gap: 12px; }
-  .nav-brand { justify-content: center; text-align: center; }
-  .nav-logo-img { height: 40px; }
-  .nav-title { border-left: none; padding-left: 0; font-size: 1em; width: 100%; }
-  .nav-controls { justify-content: space-between; width: 100%; }
-  .nav-btn { flex: 1; justify-content: center; font-size: 0.78em; padding: 8px 8px; }
-  select.nav-select { width: 100%; }
+  navbar { padding: 10px 14px; flex-direction: column; align-items: stretch; gap: 0; position: sticky; top: 0; z-index: 900; }
+  .nav-top-row { width: 100%; gap: 10px; }
+  .nav-brand { justify-content: flex-start; text-align: left; gap: 10px; flex-wrap: nowrap; min-width: 0; }
+  .nav-logo-img { height: 34px; }
+  .nav-title { border-left: 2px solid var(--border-color); padding-left: 10px; font-size: 0.92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .hamburger-btn { display: inline-flex; }
+
+  .nav-controls {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+  }
+  .nav-controls.open { display: flex; }
+
+  .nav-btn { width: 100%; justify-content: flex-start; font-size: 0.88em; padding: 10px 12px; }
+  select.nav-select { width: 100%; padding: 10px 12px; font-size: 0.88em; }
+
+  /* Banner de emergencias compacto en celular */
+  .emergency-banner {
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    border-radius: 10px;
+  }
+  .emergency-header { margin-bottom: 8px; gap: 6px; }
+  .emergency-title { font-size: 0.82em; gap: 6px; }
+  .emergency-actions { width: 100%; gap: 6px; }
+  .btn-snooze,
+  .btn-mute-banner {
+    flex: 1;
+    justify-content: center;
+    padding: 5px 8px;
+    font-size: 0.74em;
+  }
+  .emergency-cards-grid { grid-template-columns: 1fr; gap: 6px; }
+  .emergency-item-compact { padding: 7px 10px; gap: 3px; }
+  .emergency-item-top { font-size: 0.82em; }
+  .emergency-item-details { font-size: 0.76em; }
 
   .grid-heladeras { grid-template-columns: 1fr; }
-  .heladera-card { padding: 16px; }
-  .card-body { flex-direction: column; align-items: stretch; gap: 12px; }
-  .card-chart-mini { width: 100%; height: 120px; }
+  .heladera-card { padding: 15px; }
+  .temp-val { font-size: 1.35em; }
 
   .single-metrics-container { flex-direction: column; align-items: stretch; }
   .metric-box { width: 100%; }
-  .single-chart-container { padding: 12px; height: 320px; }
+  .single-chart-container { padding: 12px; }
+  .single-chart-canvas-wrap { height: 300px; }
+  .chart-time-buttons { width: 100%; }
+  .time-btn { flex: 1; text-align: center; padding: 6px 6px; font-size: 0.76em; }
+
   .form-row { grid-template-columns: 1fr; }
   .dest-add-grid { grid-template-columns: 1fr; }
   .tg-qr-box { flex-direction: column; text-align: center; }

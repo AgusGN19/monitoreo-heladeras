@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cadena-frio-hmyn-v2';
+const CACHE_NAME = 'cadena-frio-hmyn-v3';
 const ASSETS_ESTATICOS = [
   './',
   './index.html',

@@ -12,6 +12,7 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let vistaActual = 'general';
 let heladeraSeleccionada = '1';
+let horasGraficoIndividual = 2;
 let miniCharts = {};
 let chartIndividualInstance = null;
 let ultimosRegistrosGlobales = [];
@@ -116,7 +117,7 @@ function iniciarSistemaMonitoreo() {
 }
 
 // ---------------------------------------------------------------------
-// UTILIDADES DE RANGOS Y TEMPERATURAS
+// UTILIDADES DE RANGOS, NOMBRES PERSONALIZADOS Y TEMPERATURAS
 // ---------------------------------------------------------------------
 function obtenerRangoEquipo(id) {
   const key = String(id).trim();
@@ -126,7 +127,10 @@ function obtenerRangoEquipo(id) {
     fMin: null, 
     fMax: -10.0, 
     invertidos: false,
-    fechaReinicio: null
+    fechaReinicio: null,
+    nombreEquipo: `Heladera N° ${key}`,
+    nombreCanal1: 'Heladera',
+    nombreCanal2: 'Freezer'
   };
 }
 
@@ -268,7 +272,7 @@ function detenerTonoAlarma() {
 }
 
 // ---------------------------------------------------------------------
-// 3. GESTIÓN DE RANGOS, SENSORES, CORREOS, QR TELEGRAM Y HARDWARE
+// 3. GESTIÓN DE RANGOS, NOMBRES, SENSORES, CORREOS, QR Y HARDWARE
 // ---------------------------------------------------------------------
 function renderizarQRTelegram() {
   if (qrGenerado) return;
@@ -324,7 +328,10 @@ async function cargarRangosConfigurados() {
         fMin: row.freezer_min !== null ? parseFloat(row.freezer_min) : null,
         fMax: parseFloat(row.freezer_max),
         invertidos: Boolean(row.sensores_invertidos),
-        fechaReinicio: row.fecha_reinicio_graficas ? new Date(row.fecha_reinicio_graficas) : null
+        fechaReinicio: row.fecha_reinicio_graficas ? new Date(row.fecha_reinicio_graficas) : null,
+        nombreEquipo: (row.nombre_equipo && row.nombre_equipo.trim()) ? row.nombre_equipo.trim() : `Heladera N° ${key}`,
+        nombreCanal1: (row.nombre_canal_1 && row.nombre_canal_1.trim()) ? row.nombre_canal_1.trim() : 'Heladera',
+        nombreCanal2: (row.nombre_canal_2 && row.nombre_canal_2.trim()) ? row.nombre_canal_2.trim() : 'Freezer'
       };
     });
   }
@@ -335,6 +342,7 @@ async function abrirModalRangos() {
   document.getElementById('modalRangos').style.display = 'flex';
   ocultarFeedback('modalFeedback');
   actualizarSelectoresEquipos();
+  toggleSelectHeladeraModal();
   precargarValoresModal();
   renderizarQRTelegram();
   cargarDestinatarios();
@@ -358,7 +366,10 @@ function cerrarModalReinicio() {
 
 function toggleSelectHeladeraModal() {
   const modo = document.getElementById('modoAplicacion').value;
-  document.getElementById('grupoHeladeraModal').style.display = (modo === 'INDIVIDUAL') ? 'block' : 'none';
+  const esIndividual = (modo === 'INDIVIDUAL');
+  document.getElementById('grupoHeladeraModal').style.display = esIndividual ? 'block' : 'none';
+  const grupoNombreEq = document.getElementById('grupoNombreEquipo');
+  if (grupoNombreEq) grupoNombreEq.style.display = esIndividual ? 'block' : 'none';
 }
 
 function toggleSelectHeladeraReinicio() {
@@ -390,11 +401,13 @@ function actualizarSelectoresEquipos() {
 
   ids.forEach(id => {
     const safeId = escapeHTML(id);
-    selectModal.innerHTML += `<option value="${safeId}">Heladera N° ${safeId}</option>`;
-    selectReinicio.innerHTML += `<option value="${safeId}">Heladera N° ${safeId}</option>`;
-    selectNav.innerHTML += `<option value="${safeId}">Heladera N° ${safeId}</option>`;
-    if (selectLiberar) selectLiberar.innerHTML += `<option value="${safeId}">Heladera N° ${safeId}</option>`;
-    if (selectEliminar) selectEliminar.innerHTML += `<option value="${safeId}">Heladera N° ${safeId}</option>`;
+    const r = obtenerRangoEquipo(id);
+    const etiqueta = escapeHTML(r.nombreEquipo || `Heladera N° ${id}`);
+    selectModal.innerHTML += `<option value="${safeId}">${etiqueta} (ID ${safeId})</option>`;
+    selectReinicio.innerHTML += `<option value="${safeId}">${etiqueta} (ID ${safeId})</option>`;
+    selectNav.innerHTML += `<option value="${safeId}">${etiqueta}</option>`;
+    if (selectLiberar) selectLiberar.innerHTML += `<option value="${safeId}">${etiqueta} (ID ${safeId})</option>`;
+    if (selectEliminar) selectEliminar.innerHTML += `<option value="${safeId}">${etiqueta} (ID ${safeId})</option>`;
   });
 
   if (ids.includes(prevModal)) selectModal.value = prevModal;
@@ -412,6 +425,9 @@ function actualizarSelectoresEquipos() {
 function precargarValoresModal() {
   const id = document.getElementById('heladeraObjetivo').value;
   const r = obtenerRangoEquipo(id);
+  document.getElementById('inputNombreEquipo').value = r.nombreEquipo || `Heladera N° ${id}`;
+  document.getElementById('inputNombreCanal1').value = r.nombreCanal1 || 'Heladera';
+  document.getElementById('inputNombreCanal2').value = r.nombreCanal2 || 'Freezer';
   document.getElementById('inputHMin').value = r.hMin;
   document.getElementById('inputHMax').value = r.hMax;
   document.getElementById('inputFMin').value = r.fMin !== null ? r.fMin : '';
@@ -428,6 +444,54 @@ function mostrarFeedback(elementId, mensaje, esError) {
 
 function ocultarFeedback(elementId) {
   document.getElementById(elementId).style.display = 'none';
+}
+
+// --- Validación de Seguridad y Sentido Común para Etiquetas Personalizadas ---
+function validarEtiquetasPersonalizadas(esIndividual, nombreEquipo, canal1, canal2, rangoAnterior, hMin, hMax, fMin, fMax) {
+  const eq = nombreEquipo.replace(/\s+/g, ' ').trim();
+  const c1 = canal1.replace(/\s+/g, ' ').trim();
+  const c2 = canal2.replace(/\s+/g, ' ').trim();
+
+  const caracteresProhibidos = /[<>{};`\\]/;
+  if ((esIndividual && caracteresProhibidos.test(eq)) || caracteresProhibidos.test(c1) || caracteresProhibidos.test(c2)) {
+    return { valido: false, error: 'Los nombres no pueden contener caracteres especiales como <, >, {, }, ; o \\.' };
+  }
+
+  if ((esIndividual && eq.length < 3) || c1.length < 3 || c2.length < 3) {
+    return { valido: false, error: 'Cada nombre debe tener al menos 3 caracteres descriptivos.' };
+  }
+
+  const listaNegra = /^(test|prueba|asd|asdf|qwe|qwerty|xxx|123|1234|sonda|sensor|canal|equipo|sin nombre|nada|cosito)$/i;
+  if ((esIndividual && listaNegra.test(eq)) || listaNegra.test(c1) || listaNegra.test(c2)) {
+    return { valido: false, error: 'Ingresá un nombre representativo real del sector o equipo (no se permiten nombres genéricos o de prueba como "test" o "asd").' };
+  }
+
+  const norm1 = c1.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const norm2 = c2.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (norm1 === norm2) {
+    return { valido: false, error: 'El Canal 1 y el Canal 2 no pueden tener el mismo nombre. Diferencialos (ej: "Heladera 1" y "Heladera 2").' };
+  }
+
+  if (rangoAnterior) {
+    const cambioNombres = (c1 !== rangoAnterior.nombreCanal1) || (c2 !== rangoAnterior.nombreCanal2);
+    const mismosLimites = (hMin === rangoAnterior.hMin && hMax === rangoAnterior.hMax && fMin === rangoAnterior.fMin && fMax === rangoAnterior.fMax);
+
+    if (cambioNombres && mismosLimites) {
+      const fMinTxt = fMin !== null ? `${fMin}°C` : '-∞';
+      const confirma = confirm(
+        `⚠️ VERIFICACIÓN DE SEGURIDAD CLÍNICA:\n\n` +
+        `Cambiaste los nombres a "${c1}" y "${c2}", pero mantuviste los mismos límites de temperatura:\n` +
+        `• ${c1}: ${hMin}°C a ${hMax}°C\n` +
+        `• ${c2}: ${fMinTxt} a ${fMax}°C\n\n` +
+        `¿Confirmás que estos límites son los correctos para los equipos renombrados?`
+      );
+      if (!confirma) {
+        return { valido: false, error: 'Guardado cancelado. Ajustá los límites de temperatura antes de guardar.' };
+      }
+    }
+  }
+
+  return { valido: true, eq, c1, c2 };
 }
 
 // --- Gestión de Destinatarios de Alertas (Solo Email) ---
@@ -517,7 +581,7 @@ async function liberarPlacaESP32() {
   const idObj = isNaN(Number(idRaw)) ? idRaw : Number(idRaw);
 
   const ok = confirm(
-    `¿Confirmás dar de baja el ESP32 físico vinculado a la Heladera N° ${idRaw}?\n\n` +
+    `¿Confirmás dar de baja el ESP32 físico vinculado al equipo ID ${idRaw}?\n\n` +
     `La placa anterior quedará desvinculada y el próximo ESP32 que configures con el N° ${idRaw} tomará su lugar conservando todos los rangos e historiales.`
   );
   if (!ok) return;
@@ -532,7 +596,7 @@ async function liberarPlacaESP32() {
     return;
   }
 
-  mostrarFeedback('modalFeedback', `Heladera N° ${idRaw} liberada. Ya podés configurar el nuevo ESP32 con ese número.`, false);
+  mostrarFeedback('modalFeedback', `Equipo ID ${idRaw} liberado. Ya podés configurar el nuevo ESP32 con ese número.`, false);
 }
 
 // --- Baja Definitiva de Equipo (Con doble confirmación) ---
@@ -543,14 +607,14 @@ async function eliminarEquipoRegistrado() {
   const idObj = isNaN(Number(idRaw)) ? idRaw : Number(idRaw);
 
   const paso1 = confirm(
-    `⚠️ ATENCIÓN: Vas a dar de baja definitivamente la Heladera N° ${idRaw}.\n\n` +
+    `⚠️ ATENCIÓN: Vas a dar de baja definitivamente el equipo ID ${idRaw}.\n\n` +
     `Se eliminará su configuración, sus rangos y todas sus lecturas de temperatura en la base de datos.\n` +
     `¿Deseás continuar?`
   );
   if (!paso1) return;
 
   const textoConfirmacion = prompt(
-    `Para confirmar la eliminación definitiva de la Heladera N° ${idRaw}, escribí la palabra ELIMINAR en mayúsculas:`
+    `Para confirmar la eliminación definitiva del equipo ID ${idRaw}, escribí la palabra ELIMINAR en mayúsculas:`
   );
   if (textoConfirmacion !== 'ELIMINAR') {
     mostrarFeedback('modalFeedback', 'Eliminación cancelada: no se escribió la palabra de confirmación.', true);
@@ -581,7 +645,7 @@ async function eliminarEquipoRegistrado() {
   const cardDOM = document.getElementById(`card-general-${idRaw}`);
   if (cardDOM) cardDOM.remove();
 
-  mostrarFeedback('modalFeedback', `Heladera N° ${idRaw} eliminada correctamente del sistema.`, false);
+  mostrarFeedback('modalFeedback', `Equipo ID ${idRaw} eliminado correctamente del sistema.`, false);
   actualizarSelectoresEquipos();
   obtenerDatos();
 }
@@ -629,11 +693,12 @@ async function ejecutarReinicioGraficas() {
   }, 1500);
 }
 
-// --- Guardar Nuevos Rangos ---
+// --- Guardar Nuevos Rangos y Nombres ---
 async function guardarNuevosRangos() {
   if (!(await exigirSesionActiva())) return;
 
   const modo = document.getElementById('modoAplicacion').value;
+  const esIndividual = (modo === 'INDIVIDUAL');
   const invertidos = document.getElementById('selectAsignacionSensores').value === 'true';
   const hMin = parseFloat(document.getElementById('inputHMin').value);
   const hMax = parseFloat(document.getElementById('inputHMax').value);
@@ -652,18 +717,37 @@ async function guardarNuevosRangos() {
     return;
   }
 
+  const idActual = document.getElementById('heladeraObjetivo').value;
+  const rangoPrevio = esIndividual ? obtenerRangoEquipo(idActual) : null;
+
+  const validacion = validarEtiquetasPersonalizadas(
+    esIndividual,
+    document.getElementById('inputNombreEquipo').value,
+    document.getElementById('inputNombreCanal1').value,
+    document.getElementById('inputNombreCanal2').value,
+    rangoPrevio,
+    hMin, hMax, fMin, fMax
+  );
+
+  if (!validacion.valido) {
+    mostrarFeedback('modalFeedback', validacion.error, true);
+    return;
+  }
+
   const ahoraISO = new Date().toISOString();
   let heladeraIdLog = null;
 
-  if (modo === 'INDIVIDUAL') {
-    const idRaw = document.getElementById('heladeraObjetivo').value;
-    const idObj = isNaN(Number(idRaw)) ? idRaw : Number(idRaw);
+  if (esIndividual) {
+    const idObj = isNaN(Number(idActual)) ? idActual : Number(idActual);
     heladeraIdLog = idObj;
 
     const { error } = await _supabase
       .from('configuracion_rangos')
       .upsert({
         heladera_id: idObj,
+        nombre_equipo: validacion.eq,
+        nombre_canal_1: validacion.c1,
+        nombre_canal_2: validacion.c2,
         heladera_min: hMin,
         heladera_max: hMax,
         freezer_min: fMin,
@@ -680,6 +764,8 @@ async function guardarNuevosRangos() {
     const ids = Object.keys(rangosPorHeladera).map(id => isNaN(Number(id)) ? id : Number(id));
     const filasUpsert = ids.map(id => ({
       heladera_id: id,
+      nombre_canal_1: validacion.c1,
+      nombre_canal_2: validacion.c2,
       heladera_min: hMin,
       heladera_max: hMax,
       freezer_min: fMin,
@@ -711,7 +797,7 @@ async function guardarNuevosRangos() {
       sensores_invertidos: invertidos
     });
 
-  mostrarFeedback('modalFeedback', 'Configuración guardada correctamente.', false);
+  mostrarFeedback('modalFeedback', 'Configuración y nombres guardados correctamente.', false);
   
   await cargarRangosConfigurados();
   await cargarHistorialCambios();
@@ -733,14 +819,14 @@ async function cargarHistorialCambios() {
 
   tbody.innerHTML = data.map(row => {
     const fecha = new Date(row.fecha_cambio).toLocaleString('es-AR', {
-      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false
     });
     const alcance = row.tipo_aplicacion === 'GENERAL' 
       ? '<strong>Todas</strong>' 
-      : `N° ${escapeHTML(row.heladera_id)}`;
+      : `ID ${escapeHTML(row.heladera_id)}`;
     const textoSensores = row.sensores_invertidos 
-      ? 'S1:Freez / S2:Hel' 
-      : 'S1:Hel / S2:Freez';
+      ? 'S1:C2 / S2:C1' 
+      : 'S1:C1 / S2:C2';
     const textoFreezer = row.freezer_min !== null 
       ? `${Number(row.freezer_min)}° a ${Number(row.freezer_max)}°` 
       : `≤ ${Number(row.freezer_max)}°`;
@@ -767,13 +853,13 @@ async function exportarCSV() {
     return;
   }
 
-  let csv = 'Fecha y Hora;Equipo;Temp Heladera (C);Temp Freezer (C);Estado\n';
+  let csv = 'Fecha y Hora;Equipo;Canal 1 (C);Canal 2 (C);Estado\n';
 
   ultimosRegistrosGlobales.forEach(row => {
     const id = String(row.heladera_id).trim();
     const rango = obtenerRangoEquipo(id);
     const { tempH, tempF } = extraerTemperaturasReales(row, rango);
-    const fechaStr = new Date(row.fecha_hora).toLocaleString('es-AR');
+    const fechaStr = new Date(row.fecha_hora).toLocaleString('es-AR', { hour12: false });
 
     const hCrit = tempH !== null && (tempH < rango.hMin || tempH > rango.hMax);
     const fCrit = tempF !== null && (tempF > rango.fMax || (rango.fMin !== null && tempF < rango.fMin));
@@ -782,7 +868,7 @@ async function exportarCSV() {
     const valH = tempH !== null ? tempH.toFixed(1).replace('.', ',') : '';
     const valF = tempF !== null ? tempF.toFixed(1).replace('.', ',') : '';
 
-    csv += `${fechaStr};Heladera N° ${id};${valH};${valF};${estado}\n`;
+    csv += `${fechaStr};${rango.nombreEquipo};${valH};${valF};${estado}\n`;
   });
 
   const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
@@ -879,7 +965,11 @@ async function obtenerDatos() {
     if (!medicionesPorHeladera[id]) {
       medicionesPorHeladera[id] = [];
       if (!rangosPorHeladera[id]) {
-        rangosPorHeladera[id] = { hMin: 2.0, hMax: 8.0, fMin: null, fMax: -10.0, invertidos: false, fechaReinicio: null };
+        rangosPorHeladera[id] = {
+          hMin: 2.0, hMax: 8.0, fMin: null, fMax: -10.0,
+          invertidos: false, fechaReinicio: null,
+          nombreEquipo: `Heladera N° ${id}`, nombreCanal1: 'Heladera', nombreCanal2: 'Freezer'
+        };
       }
     }
 
@@ -899,11 +989,11 @@ async function obtenerDatos() {
     renderizarVistaIndividual(medicionesPorHeladera[heladeraSeleccionada] || [], heladeraSeleccionada);
   }
 
-  document.getElementById('lastUpdate').innerText = `Última sincronización global: ${new Date().toLocaleTimeString('es-AR')}`;
+  document.getElementById('lastUpdate').innerText = `Última sincronización global: ${new Date().toLocaleTimeString('es-AR', { hour12: false })}`;
 }
 
 // ---------------------------------------------------------------------
-// 7. BANNER SUPERIOR DE EMERGENCIAS (CRÍTICO + SIN SEÑAL SIMULTÁNEO)
+// 7. BANNER SUPERIOR DE EMERGENCIAS (COMPACTO Y DE ALTO CONTRASTE)
 // ---------------------------------------------------------------------
 function evaluarEmergencias(medicionesPorHeladera) {
   const banner = document.getElementById('emergencyBanner');
@@ -919,6 +1009,9 @@ function evaluarEmergencias(medicionesPorHeladera) {
     const safeId = escapeHTML(id);
     const ultimo = registros[0];
     const rango = obtenerRangoEquipo(id);
+    const nombreEqSafe = escapeHTML(rango.nombreEquipo);
+    const canal1Safe = escapeHTML(rango.nombreCanal1);
+    const canal2Safe = escapeHTML(rango.nombreCanal2);
     const { tempH, tempF, sensorH, sensorF } = extraerTemperaturasReales(ultimo, rango);
     const minsSinDatos = calcularMinutosTranscurridos(ultimo.fecha_hora);
     const estaOffline = minsSinDatos > MINUTOS_TIMEOUT_OFFLINE;
@@ -931,17 +1024,17 @@ function evaluarEmergencias(medicionesPorHeladera) {
     if (hCritica || fCritica) {
       hayEmergenciaActiva = true;
       grid.innerHTML += `
-        <div class="heladera-card in-alert" onclick="abrirDetalleHeladera('${safeId}')" title="Ver gráfico detallado de Heladera N° ${safeId}">
-          <div class="card-header">
-            <span class="card-title" style="color: var(--alert-red)"><i class="fa-solid fa-box-archive"></i> Heladera N° ${safeId}</span>
-            <div style="display:flex; gap:5px; flex-wrap:wrap; justify-content:flex-end;">
+        <div class="emergency-item-compact" onclick="abrirDetalleHeladera('${safeId}')" title="Ver gráfico detallado de ${nombreEqSafe}">
+          <div class="emergency-item-top">
+            <span><i class="fa-solid fa-box-archive"></i> ${nombreEqSafe}</span>
+            <div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end;">
               <span class="card-badge badge-alert"><i class="fa-solid fa-triangle-exclamation"></i> CRÍTICO</span>
               ${estaOffline ? `<span class="card-badge badge-offline"><i class="fa-solid fa-wifi"></i> SIN SEÑAL (${minsSinDatos}m)</span>` : ''}
             </div>
           </div>
-          <div style="font-size: 0.9em; line-height: 1.5; color: #7F1D1D; font-weight:600;">
-            ${hCritica ? `<div><i class="fa-solid fa-temperature-high"></i> Heladera (${sensorH}): <strong style="color:var(--alert-red); font-size:1.1em;">${tempH.toFixed(1)} °C</strong> <span style="font-size:0.8em;">(${rango.hMin}° a ${rango.hMax}°)</span></div>` : ''}
-            ${fCritica ? `<div><i class="fa-solid fa-snowflake"></i> Freezer (${sensorF}): <strong style="color:var(--alert-red); font-size:1.1em;">${tempF.toFixed(1)} °C</strong> <span style="font-size:0.8em;">(${formatearTextoFreezer(rango)})</span></div>` : ''}
+          <div class="emergency-item-details">
+            ${hCritica ? `<div><span class="color-dot dot-heladera"></span> ${canal1Safe} (${sensorH}): <strong>${tempH.toFixed(1)} °C</strong> <span>(${rango.hMin}° a ${rango.hMax}°)</span></div>` : ''}
+            ${fCritica ? `<div><span class="color-dot dot-freezer"></span> ${canal2Safe} (${sensorF}): <strong>${tempF.toFixed(1)} °C</strong> <span>(${formatearTextoFreezer(rango)})</span></div>` : ''}
           </div>
         </div>
       `;
@@ -958,7 +1051,7 @@ function evaluarEmergencias(medicionesPorHeladera) {
 }
 
 // ---------------------------------------------------------------------
-// 8. RENDERIZADO DE VISTA GENERAL
+// 8. RENDERIZADO DE VISTA GENERAL (TARJETA COMPACTA CON CURVA ANCHA)
 // ---------------------------------------------------------------------
 function renderizarVistaGeneral(medicionesPorHeladera) {
   const container = document.getElementById('vistaGeneral');
@@ -973,13 +1066,17 @@ function renderizarVistaGeneral(medicionesPorHeladera) {
       container.appendChild(card);
     }
 
-    card.onclick = () => abrirDetalleHeladera(id);
-    card.title = `Hacé clic para ver el gráfico detallado de Heladera N° ${safeId}`;
-
     const rango = obtenerRangoEquipo(id);
-    const registros = (medicionesPorHeladera[id] || []).slice(0, 12).reverse();
+    const nombreEqSafe = escapeHTML(rango.nombreEquipo);
+    const canal1Safe = escapeHTML(rango.nombreCanal1);
+    const canal2Safe = escapeHTML(rango.nombreCanal2);
+
+    card.onclick = () => abrirDetalleHeladera(id);
+    card.title = `Hacé clic para ver el gráfico detallado de ${nombreEqSafe}`;
+
+    const registros = (medicionesPorHeladera[id] || []).slice(0, 24).reverse();
     const textoReinicio = rango.fechaReinicio 
-      ? `<span><i class="fa-solid fa-clock"></i> Inicio: ${rango.fechaReinicio.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>` 
+      ? `<span><i class="fa-solid fa-clock"></i> Inicio: ${rango.fechaReinicio.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}</span>` 
       : '<span></span>';
 
     if (registros.length === 0) {
@@ -990,18 +1087,18 @@ function renderizarVistaGeneral(medicionesPorHeladera) {
       card.className = 'heladera-card';
       card.innerHTML = `
         <div class="card-header">
-          <span class="card-title"><i class="fa-solid fa-box-archive" style="color:var(--accent-teal);"></i> Heladera N° ${safeId}</span>
+          <span class="card-title"><i class="fa-solid fa-box-archive" style="color:var(--accent-teal);"></i> ${nombreEqSafe}</span>
           <span class="card-badge badge-waiting"><i class="fa-solid fa-hourglass-half"></i> ESPERANDO</span>
         </div>
         <div class="card-body">
           <div class="card-temps">
             <div class="temp-item">
-              <div class="temp-label">Heladera <span class="sensor-tag">${rango.invertidos ? 'Sensor 2' : 'Sensor 1'}</span></div>
+              <div class="temp-label"><span class="color-dot dot-heladera"></span> ${canal1Safe} <span class="sensor-tag">${rango.invertidos ? 'Sensor 2' : 'Sensor 1'}</span></div>
               <div class="temp-val">-- °C</div>
               <div class="temp-range-hint">Límite: ${rango.hMin}°C a ${rango.hMax}°C</div>
             </div>
             <div class="temp-item">
-              <div class="temp-label">Freezer <span class="sensor-tag">${rango.invertidos ? 'Sensor 1' : 'Sensor 2'}</span></div>
+              <div class="temp-label"><span class="color-dot dot-freezer"></span> ${canal2Safe} <span class="sensor-tag">${rango.invertidos ? 'Sensor 1' : 'Sensor 2'}</span></div>
               <div class="temp-val">-- °C</div>
               <div class="temp-range-hint">Límite: ${formatearTextoFreezer(rango)}</div>
             </div>
@@ -1046,28 +1143,28 @@ function renderizarVistaGeneral(medicionesPorHeladera) {
       badgeHTML = `<span class="card-badge badge-offline"><i class="fa-solid fa-wifi"></i> SIN SEÑAL (${minsSinDatos}m)</span>`;
     }
 
-    const horaUltimoDato = new Date(ultimo.fecha_hora).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    const horaUltimoDato = new Date(ultimo.fecha_hora).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
 
     card.className = cardClase;
     card.innerHTML = `
       <div class="card-header">
-        <span class="card-title"><i class="fa-solid fa-box-archive" style="color:var(--accent-teal);"></i> Heladera N° ${safeId}</span>
+        <span class="card-title"><i class="fa-solid fa-box-archive" style="color:var(--accent-teal);"></i> ${nombreEqSafe}</span>
         ${badgeHTML}
       </div>
       <div class="card-body">
         <div class="card-temps">
           <div class="temp-item">
             <div class="temp-label">
-              <i class="fa-solid fa-temperature-three-quarters" style="color:var(--accent-teal);"></i> 
-              Heladera <span class="sensor-tag">${sensorH}</span>
+              <span class="color-dot dot-heladera"></span>
+              ${canal1Safe} <span class="sensor-tag">${sensorH}</span>
             </div>
             <div class="temp-val ${hCritica ? 'critical' : ''}">${tempH !== null ? tempH.toFixed(1) + ' °C' : '--'}</div>
             <div class="temp-range-hint">Límite: ${rango.hMin}°C a ${rango.hMax}°C</div>
           </div>
           <div class="temp-item">
             <div class="temp-label">
-              <i class="fa-solid fa-snowflake" style="color:var(--text-muted);"></i> 
-              Freezer <span class="sensor-tag">${sensorF}</span>
+              <span class="color-dot dot-freezer"></span>
+              ${canal2Safe} <span class="sensor-tag">${sensorF}</span>
             </div>
             <div class="temp-val ${fCritica ? 'critical' : ''}">${tempF !== null ? tempF.toFixed(1) + ' °C' : '--'}</div>
             <div class="temp-range-hint">Límite: ${formatearTextoFreezer(rango)}</div>
@@ -1088,10 +1185,13 @@ function renderizarVistaGeneral(medicionesPorHeladera) {
 }
 
 function renderMiniChart(id, registros, rango) {
-  const ctx = document.getElementById(`mini-chart-${id}`)?.getContext('2d');
-  if (!ctx) return;
+  const canvas = document.getElementById(`mini-chart-${id}`);
+  if (!canvas) return;
 
-  const labels = registros.map(r => new Date(r.fecha_hora).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }));
+  canvas.onclick = (e) => e.stopPropagation();
+
+  const ctx = canvas.getContext('2d');
+  const labels = registros.map(r => new Date(r.fecha_hora).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }));
   const dataH = registros.map(r => extraerTemperaturasReales(r, rango).tempH);
   const dataF = registros.map(r => extraerTemperaturasReales(r, rango).tempF);
 
@@ -1104,41 +1204,201 @@ function renderMiniChart(id, registros, rango) {
     data: {
       labels: labels,
       datasets: [
-        { label: 'Heladera', data: dataH, borderColor: '#29A19C', borderWidth: 2.5, pointRadius: registros.length === 1 ? 3 : 0, tension: 0.3 },
-        { label: 'Freezer', data: dataF, borderColor: '#64748B', borderWidth: 1.5, pointRadius: registros.length === 1 ? 3 : 0, tension: 0.3 }
+        {
+          label: rango.nombreCanal1,
+          data: dataH,
+          borderColor: '#29A19C',
+          backgroundColor: 'rgba(41, 161, 156, 0.10)',
+          borderWidth: 2,
+          pointRadius: registros.length <= 3 ? 3 : 0,
+          pointHoverRadius: 4,
+          fill: true,
+          tension: 0.3
+        },
+        {
+          label: rango.nombreCanal2,
+          data: dataF,
+          borderColor: '#64748B',
+          backgroundColor: 'rgba(100, 116, 139, 0.06)',
+          borderWidth: 1.8,
+          pointRadius: registros.length <= 3 ? 3 : 0,
+          pointHoverRadius: 4,
+          fill: true,
+          tension: 0.3
+        }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { x: { display: false }, y: { display: false } }
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          backgroundColor: 'rgba(15, 23, 42, 0.92)',
+          titleFont: { family: 'Inter', size: 11, weight: '700' },
+          bodyFont: { family: 'Inter', size: 11 },
+          padding: 7,
+          callbacks: {
+            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y !== null ? ctx.parsed.y.toFixed(1) + ' °C' : '--'}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          display: true,
+          grid: { display: false },
+          ticks: {
+            color: '#64748B',
+            font: { family: 'Inter', size: 9 },
+            maxTicksLimit: 4,
+            maxRotation: 0
+          }
+        },
+        y: {
+          display: true,
+          grid: { color: 'rgba(203, 213, 225, 0.45)', drawBorder: false },
+          ticks: {
+            color: '#64748B',
+            font: { family: 'Inter', size: 9 },
+            maxTicksLimit: 4,
+            callback: (val) => `${val}°`
+          }
+        }
+      }
     }
   });
 }
 
 // ---------------------------------------------------------------------
-// 9. RENDERIZADO DE VISTA INDIVIDUAL DETALLADA
+// 9. RENDERIZADO DE VISTA INDIVIDUAL DETALLADA (CON RANGO TEMPORAL)
 // ---------------------------------------------------------------------
+function cambiarRangoGrafico(horas, btnElement) {
+  horasGraficoIndividual = Number(horas) || 2;
+
+  document.querySelectorAll('#chartRangeButtons .time-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  if (btnElement) {
+    btnElement.classList.add('active');
+  }
+
+  obtenerDatos();
+}
+
+async function obtenerHistoricoHeladeraIndividual(id, rango) {
+  const idConsulta = isNaN(Number(id)) ? id : Number(id);
+  const fechaDesde = new Date(Date.now() - horasGraficoIndividual * 60 * 60 * 1000);
+
+  const limiteInferior = (rango.fechaReinicio && rango.fechaReinicio > fechaDesde)
+    ? rango.fechaReinicio
+    : fechaDesde;
+
+  const { data, error } = await _supabase
+    .from('mediciones_temperatura')
+    .select('*')
+    .eq('heladera_id', idConsulta)
+    .gte('fecha_hora', limiteInferior.toISOString())
+    .order('fecha_hora', { ascending: true })
+    .limit(2500);
+
+  if (error) {
+    console.error('Error cargando histórico individual:', error);
+    return [];
+  }
+  return data || [];
+}
+
+const etiquetasSobreCurvasPlugin = {
+  id: 'etiquetasSobreCurvas',
+  afterDatasetsDraw(chart) {
+    const { ctx } = chart;
+    ctx.save();
+    ctx.font = '700 11px Inter, sans-serif';
+    ctx.textBaseline = 'bottom';
+
+    chart.data.datasets.forEach((dataset, i) => {
+      const meta = chart.getDatasetMeta(i);
+      if (meta.hidden || !meta.data || meta.data.length === 0) return;
+
+      let idx = meta.data.length - 1;
+      while (idx >= 0 && (dataset.data[idx] === null || dataset.data[idx] === undefined)) {
+        idx--;
+      }
+      if (idx < 0) return;
+
+      const punto = meta.data[idx];
+      const texto = dataset.curveTag || dataset.label || '';
+      const anchoTexto = ctx.measureText(texto).width;
+
+      let posX = punto.x - anchoTexto / 2;
+      if (posX + anchoTexto > chart.chartArea.right - 4) {
+        posX = chart.chartArea.right - anchoTexto - 4;
+      }
+      if (posX < chart.chartArea.left + 4) {
+        posX = chart.chartArea.left + 4;
+      }
+
+      const posY = Math.max(punto.y - 7, chart.chartArea.top + 14);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+      ctx.fillRect(posX - 3, posY - 13, anchoTexto + 6, 15);
+
+      ctx.fillStyle = dataset.borderColor || '#0F172A';
+      ctx.fillText(texto, posX, posY);
+    });
+
+    ctx.restore();
+  }
+};
+
 function inicializarGraficoIndividual() {
   const ctx = document.getElementById('chartIndividual').getContext('2d');
   if (chartIndividualInstance) chartIndividualInstance.destroy();
+
+  const rangoActual = obtenerRangoEquipo(heladeraSeleccionada);
+  const tagH = rangoActual.invertidos ? 'Sensor 2' : 'Sensor 1';
+  const tagF = rangoActual.invertidos ? 'Sensor 1' : 'Sensor 2';
 
   chartIndividualInstance = new Chart(ctx, {
     type: 'line',
     data: {
       labels: [],
       datasets: [
-        { label: 'Heladera (°C)', borderColor: '#29A19C', backgroundColor: 'rgba(41, 161, 156, 0.08)', data: [], borderWidth: 2.5, fill: true, tension: 0.3 },
-        { label: 'Freezer (°C)', borderColor: '#64748B', backgroundColor: 'rgba(100, 116, 139, 0.04)', data: [], borderWidth: 2, fill: true, tension: 0.3 }
+        {
+          label: `${rangoActual.nombreCanal1} (${tagH})`,
+          curveTag: `${rangoActual.nombreCanal1} (${tagH})`,
+          borderColor: '#29A19C',
+          backgroundColor: 'rgba(41, 161, 156, 0.08)',
+          data: [],
+          borderWidth: 2.5,
+          fill: true,
+          tension: 0.3
+        },
+        {
+          label: `${rangoActual.nombreCanal2} (${tagF})`,
+          curveTag: `${rangoActual.nombreCanal2} (${tagF})`,
+          borderColor: '#64748B',
+          backgroundColor: 'rgba(100, 116, 139, 0.04)',
+          data: [],
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3
+        }
       ]
     },
+    plugins: [etiquetasSobreCurvasPlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: { padding: { top: 18, right: 12 } },
       plugins: {
-        title: { display: true, text: `Histórico Detallado - Heladera N° ${heladeraSeleccionada}`, color: '#0F172A', font: { family: 'Inter', size: 15, weight: 700 } },
-        legend: { labels: { color: '#0F172A', font: { family: 'Inter', weight: 600 } } }
+        title: { display: true, text: `Histórico Detallado - ${rangoActual.nombreEquipo}`, color: '#0F172A', font: { family: 'Inter', size: 15, weight: 700 } },
+        legend: { labels: { color: '#0F172A', font: { family: 'Inter', weight: 600 }, usePointStyle: true, pointStyle: 'circle' } }
       },
       scales: {
         x: { title: { display: true, text: 'Hora', color: '#64748B', font: { family: 'Inter' } }, ticks: { color: '#0F172A', font: { family: 'Inter' } }, grid: { color: '#E2E8F0' } },
@@ -1148,18 +1408,26 @@ function inicializarGraficoIndividual() {
   });
 }
 
-function renderizarVistaIndividual(registros, id) {
+async function renderizarVistaIndividual(registrosRecientes, id) {
   const rango = obtenerRangoEquipo(id);
+  const tagH = rango.invertidos ? 'Sensor 2' : 'Sensor 1';
+  const tagF = rango.invertidos ? 'Sensor 1' : 'Sensor 2';
 
-  if (!registros || registros.length === 0) {
-    document.getElementById('singleSensorTagH').innerText = rango.invertidos ? 'Sensor 2' : 'Sensor 1';
+  document.getElementById('singleLabelH').innerText = rango.nombreCanal1;
+  document.getElementById('singleLabelF').innerText = rango.nombreCanal2;
+
+  const ordenados = await obtenerHistoricoHeladeraIndividual(id, rango);
+  const listaReferencia = ordenados.length > 0 ? ordenados : [...registrosRecientes].reverse();
+
+  if (!listaReferencia || listaReferencia.length === 0) {
+    document.getElementById('singleSensorTagH').innerText = tagH;
     document.getElementById('singleTempH').innerText = '-- °C';
     document.getElementById('singleRangeH').innerText = `Límite: ${rango.hMin}°C a ${rango.hMax}°C`;
     document.getElementById('singleStatusH').innerHTML = '<i class="fa-solid fa-hourglass-half"></i> ESPERANDO';
     document.getElementById('singleStatusH').className = 'card-badge badge-waiting';
     document.getElementById('singleCardH').className = 'metric-box';
 
-    document.getElementById('singleSensorTagF').innerText = rango.invertidos ? 'Sensor 1' : 'Sensor 2';
+    document.getElementById('singleSensorTagF').innerText = tagF;
     document.getElementById('singleTempF').innerText = '-- °C';
     document.getElementById('singleRangeF').innerText = `Límite: ${formatearTextoFreezer(rango)}`;
     document.getElementById('singleStatusF').innerHTML = '<i class="fa-solid fa-hourglass-half"></i> ESPERANDO';
@@ -1167,17 +1435,20 @@ function renderizarVistaIndividual(registros, id) {
     document.getElementById('singleCardF').className = 'metric-box';
 
     if (chartIndividualInstance) {
-      chartIndividualInstance.options.plugins.title.text = `Histórico Detallado - Heladera N° ${heladeraSeleccionada} (Esperando lecturas)`;
+      chartIndividualInstance.options.plugins.title.text = `Histórico Detallado - ${rango.nombreEquipo} (Sin lecturas en este rango)`;
       chartIndividualInstance.data.labels = [];
+      chartIndividualInstance.data.datasets[0].label = `${rango.nombreCanal1} (${tagH})`;
+      chartIndividualInstance.data.datasets[0].curveTag = `${rango.nombreCanal1} (${tagH})`;
       chartIndividualInstance.data.datasets[0].data = [];
+      chartIndividualInstance.data.datasets[1].label = `${rango.nombreCanal2} (${tagF})`;
+      chartIndividualInstance.data.datasets[1].curveTag = `${rango.nombreCanal2} (${tagF})`;
       chartIndividualInstance.data.datasets[1].data = [];
       chartIndividualInstance.update();
     }
     return;
   }
 
-  const ordenados = [...registros].slice(0, 20).reverse();
-  const ultimo = ordenados[ordenados.length - 1];
+  const ultimo = listaReferencia[listaReferencia.length - 1];
   const { tempH, tempF, sensorH, sensorF } = extraerTemperaturasReales(ultimo, rango);
 
   const hCritica = tempH !== null && (tempH < rango.hMin || tempH > rango.hMax);
@@ -1200,13 +1471,76 @@ function renderizarVistaIndividual(registros, id) {
   document.getElementById('singleCardF').className = `metric-box ${fCritica ? 'alert-border' : ''}`;
 
   if (chartIndividualInstance) {
-    chartIndividualInstance.options.plugins.title.text = `Histórico Detallado - Heladera N° ${heladeraSeleccionada}`;
-    chartIndividualInstance.data.labels = ordenados.map(r => new Date(r.fecha_hora).toLocaleTimeString('es-AR'));
+    const textoRango = horasGraficoIndividual === 168 ? 'Últimos 7 días' : `Últimas ${horasGraficoIndividual} h`;
+    const mostrarFecha = horasGraficoIndividual >= 24;
+    const radioPunto = ordenados.length > 60 ? 0 : 3;
+
+    chartIndividualInstance.options.plugins.title.text = `Histórico Detallado - ${rango.nombreEquipo} (${textoRango})`;
+    chartIndividualInstance.options.scales.x.title.text = mostrarFecha ? 'Fecha y Hora' : 'Hora';
+
+    chartIndividualInstance.data.labels = ordenados.map(r => {
+      const d = new Date(r.fecha_hora);
+      return mostrarFecha
+        ? d.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })
+        : d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+    });
+
+    chartIndividualInstance.data.datasets[0].label = `${rango.nombreCanal1} (${sensorH})`;
+    chartIndividualInstance.data.datasets[0].curveTag = `${rango.nombreCanal1} (${sensorH})`;
+    chartIndividualInstance.data.datasets[0].pointRadius = radioPunto;
+    chartIndividualInstance.data.datasets[0].pointHitRadius = 10;
     chartIndividualInstance.data.datasets[0].data = ordenados.map(r => extraerTemperaturasReales(r, rango).tempH);
+
+    chartIndividualInstance.data.datasets[1].label = `${rango.nombreCanal2} (${sensorF})`;
+    chartIndividualInstance.data.datasets[1].curveTag = `${rango.nombreCanal2} (${sensorF})`;
+    chartIndividualInstance.data.datasets[1].pointRadius = radioPunto;
+    chartIndividualInstance.data.datasets[1].pointHitRadius = 10;
     chartIndividualInstance.data.datasets[1].data = ordenados.map(r => extraerTemperaturasReales(r, rango).tempF);
+
     chartIndividualInstance.update();
   }
 }
+
+// ---------------------------------------------------------------------
+// 10. MENÚ HAMBURGUESA RESPONSIVO (MÓVIL)
+// ---------------------------------------------------------------------
+function toggleMobileMenu() {
+  const navControls = document.getElementById('navControls');
+  const btnMenu = document.getElementById('btnMobileMenu');
+  if (!navControls || !btnMenu) return;
+
+  const abierto = navControls.classList.toggle('open');
+  btnMenu.classList.toggle('is-open', abierto);
+  btnMenu.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+
+  const icono = btnMenu.querySelector('i');
+  if (icono) {
+    icono.className = abierto ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+  }
+}
+
+function cerrarMobileMenu() {
+  const navControls = document.getElementById('navControls');
+  const btnMenu = document.getElementById('btnMobileMenu');
+  if (!navControls || !btnMenu) return;
+
+  navControls.classList.remove('open');
+  btnMenu.classList.remove('is-open');
+  btnMenu.setAttribute('aria-expanded', 'false');
+
+  const icono = btnMenu.querySelector('i');
+  if (icono) {
+    icono.className = 'fa-solid fa-bars';
+  }
+}
+
+document.addEventListener('click', (e) => {
+  const navbar = document.querySelector('navbar');
+  const navControls = document.getElementById('navControls');
+  if (navbar && navControls && navControls.classList.contains('open') && !navbar.contains(e.target)) {
+    cerrarMobileMenu();
+  }
+});
 
 // ---------------------------------------------------------------------
 // ARRANQUE VERIFICANDO SESIÓN ACTIVA Y REGISTRO PWA
